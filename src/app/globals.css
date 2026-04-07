@@ -61,3 +61,40 @@ body {
     transform: translate3d(-50%, 0, 0);
   }
 }
+
+/*
+ * Custom cursors (desktop): scripts/generate-cursor-asset.py
+ * — default + pointer (iets gedraaid t.o.v. default, zelfde stijl als “handje”).
+ */
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+  html {
+    cursor: url("/images/cursor_thick_outline_cursor.png") 2 2, auto;
+  }
+
+  a:any-link,
+  button:not(:disabled),
+  input:not([disabled]):is(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="range"]
+    ),
+  label,
+  summary,
+  select:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="link"] {
+    cursor: url("/images/cursor_thick_outline_pointer.png") 3 2, pointer !important;
+  }
+
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not(
+      [type="checkbox"]
+    ):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  [contenteditable="true"] {
+    cursor: text !important;
+  }
+}

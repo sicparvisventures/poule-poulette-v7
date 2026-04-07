@@ -37,6 +37,10 @@ const AFTER_LAST_SLIDE_MS = 320;
 const wordmarkClass =
   "font-display text-center leading-[0.95] tracking-wide text-pp-creme text-[clamp(2.15rem,6.8vw,3.65rem)]";
 
+/** Splash: lichte achtergrond → donker woordmerk (omgekeerd t.o.v. hero-olive). */
+const splashWordmarkClass =
+  "font-display text-center leading-[0.95] tracking-wide text-pp-olive text-[clamp(2.15rem,6.8vw,3.65rem)]";
+
 type SlideshowProps = { onComplete: () => void };
 
 function SplashSlideshow({ onComplete }: SlideshowProps) {
@@ -68,7 +72,7 @@ function SplashSlideshow({ onComplete }: SlideshowProps) {
         {show ? (
           <motion.p
             key={idx}
-            className="font-display text-center text-[clamp(1.2rem,3.8vw,1.85rem)] tracking-[0.04em] text-pp-lollypop drop-shadow-[0_2px_18px_rgb(0_0_0/0.35)]"
+            className="font-display text-center text-[clamp(1.2rem,3.8vw,1.85rem)] tracking-[0.04em] text-pp-olive drop-shadow-[0_1px_14px_rgb(253_248_193/0.9)]"
             initial={{ opacity: 0, y: 6 }}
             animate={{
               opacity: 1,
@@ -182,7 +186,7 @@ export function HomeExperience() {
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-0 z-40 bg-linear-to-b from-pp-olive via-pp-olive to-[#0f1c19]"
+              className="fixed inset-0 z-40 bg-linear-to-b from-pp-creme via-pp-white to-pp-creme/95"
               aria-hidden
             />
           )}
@@ -198,13 +202,13 @@ export function HomeExperience() {
             <SplashPolaroidCollage reduceMotion={reduceMotion} />
 
             <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center pb-28 pt-10">
-              <p className="mb-5 text-center font-accent text-[0.6rem] tracking-[0.4em] text-pp-creme/50 uppercase sm:mb-6 sm:text-[0.65rem] sm:tracking-[0.42em]">
+              <p className="mb-5 text-center font-accent text-[0.6rem] tracking-[0.4em] text-pp-olive/45 uppercase sm:mb-6 sm:text-[0.65rem] sm:tracking-[0.42em]">
                 Welkom bij
               </p>
 
               <motion.h1
                 layoutId={WORDMARK_LAYOUT_ID}
-                className={`relative z-10 mx-auto w-full max-w-[min(92vw,44rem)] px-2 text-center ${wordmarkClass}`}
+                className={`relative z-10 mx-auto w-full max-w-[min(92vw,44rem)] px-2 text-center ${splashWordmarkClass}`}
                 transition={{
                   type: "spring",
                   stiffness: 320,
@@ -226,9 +230,22 @@ export function HomeExperience() {
             <button
               type="button"
               onClick={dismissSplash}
-              className="pointer-events-auto absolute bottom-7 left-1/2 z-50 -translate-x-1/2 rounded-sm font-accent text-[0.65rem] tracking-[0.24em] text-pp-creme/45 uppercase underline decoration-pp-creme/30 underline-offset-[6px] transition-colors hover:text-pp-lollypop hover:decoration-pp-lollypop/55 sm:bottom-9"
+              aria-label="Overslaan"
+              className="pointer-events-auto absolute bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2 rounded-sm sm:bottom-8"
             >
-              Overslaan
+              {!reduceMotion ? (
+                <Image
+                  src="/images/chicken_walk.gif"
+                  alt=""
+                  width={160}
+                  height={160}
+                  unoptimized
+                  className="h-auto w-[min(42vw,7.5rem)] object-contain opacity-95 drop-shadow-[0_6px_20px_rgb(28_56_52/0.2)] sm:w-32 md:w-36"
+                />
+              ) : null}
+              <span className="font-accent text-[0.65rem] tracking-[0.24em] text-pp-olive/40 uppercase underline decoration-pp-olive/25 underline-offset-[6px] transition-colors hover:text-pp-lollypop hover:decoration-pp-lollypop/50">
+                Overslaan
+              </span>
             </button>
           </div>
         ) : null}
@@ -274,11 +291,56 @@ export function HomeExperience() {
                   </video>
                 )}
                 <div
-                  className="pointer-events-none absolute inset-0 bg-(--pp-hero-veil)"
+                  className="pointer-events-none absolute inset-0 z-1 overflow-hidden"
+                  aria-hidden
+                >
+                  <div className="absolute left-1/2 top-1/2 h-[128%] w-[128%] -translate-x-[51%] -translate-y-1/2 -rotate-[4deg] md:h-[132%] md:w-[132%] md:-translate-x-[52%] md:-rotate-[5deg]">
+                    <Image
+                      src="/images/frame_transparent.png"
+                      alt=""
+                      width={413}
+                      height={429}
+                      className="h-full w-full object-contain object-center opacity-[0.88]"
+                      sizes="100vw"
+                    />
+                  </div>
+                </div>
+                <div
+                  className="pointer-events-none absolute inset-0 z-2 bg-(--pp-hero-veil)"
                   aria-hidden
                 />
 
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-pp-black/75 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-2 h-1/2 bg-linear-to-t from-pp-black/75 to-transparent" />
+
+                <div
+                  className="pointer-events-none absolute left-3 top-[max(4.5rem,12vh)] z-8 w-[min(26vw,4.25rem)] opacity-[0.92] sm:left-5 sm:top-[max(5rem,14vh)] sm:w-[min(22vw,4.75rem)] md:left-6 md:top-28 md:w-20"
+                  aria-hidden
+                >
+                  <Image
+                    src="/images/doodle_clean_upscaled.png"
+                    alt=""
+                    width={256}
+                    height={256}
+                    className="h-auto w-full object-contain drop-shadow-[0_6px_20px_rgb(0_0_0/0.5)]"
+                    sizes="(max-width: 768px) 26vw, 80px"
+                  />
+                </div>
+
+                {!reduceMotion ? (
+                  <div
+                    className="pointer-events-none absolute right-0 bottom-12 z-8 w-[min(58vw,15.5rem)] opacity-[0.95] drop-shadow-[0_10px_28px_rgb(0_0_0/0.55)] sm:bottom-14 sm:w-[min(50vw,17rem)] md:bottom-16 md:w-[min(42vw,18rem)] md:max-w-[18rem]"
+                    aria-hidden
+                  >
+                    <Image
+                      src="/images/chicken_walk.gif"
+                      alt=""
+                      width={288}
+                      height={288}
+                      unoptimized
+                      className="h-auto w-full scale-x-[-1] object-contain object-bottom-right select-none"
+                    />
+                  </div>
+                ) : null}
 
                 <div
                   className="pointer-events-none absolute inset-0 z-5 flex items-center justify-center px-6"
@@ -316,68 +378,65 @@ export function HomeExperience() {
 
               <div className="relative z-1 border-t border-pp-white/10 bg-pp-olive px-6 py-8 text-pp-white">
                 <div
-                  className="pointer-events-none absolute bottom-full left-[4%] z-20 w-[min(50vw,10.25rem)] translate-y-1/2 -rotate-12 sm:left-[6%] sm:w-[min(44vw,11.75rem)] sm:-rotate-11 md:left-[7%] md:w-[min(32vw,13.5rem)] md:translate-y-[48%] md:-rotate-10"
+                  className="pointer-events-none absolute bottom-full left-[4%] z-40 w-[min(50vw,10.25rem)] translate-y-1/2 -rotate-12 sm:left-[6%] sm:w-[min(44vw,11.75rem)] sm:-rotate-11 md:left-[7%] md:w-[min(32vw,13.5rem)] md:translate-y-[48%] md:-rotate-10"
                   aria-hidden
                 >
-                  <div className="relative w-full">
-                    <Image
-                      src="/fotookes/hero-sticker-seam.png"
-                      alt=""
-                      width={640}
-                      height={640}
-                      className="relative z-0 h-auto w-full object-contain drop-shadow-[0_12px_36px_rgb(0_0_0/0.55)]"
-                      sizes="(max-width: 768px) 50vw, 216px"
-                    />
-                    <div className="absolute inset-[10%_14%_16%_14%] z-10 flex items-center justify-center sm:inset-[9%_13%_15%_13%]">
+                  <Image
+                    src="/fotookes/hero-sticker-seam.png"
+                    alt=""
+                    width={640}
+                    height={640}
+                    className="h-auto w-full object-contain drop-shadow-[0_12px_36px_rgb(0_0_0/0.55)]"
+                    sizes="(max-width: 768px) 50vw, 216px"
+                  />
+                </div>
+                {!splashActive ? (
+                  <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 md:grid-cols-[minmax(0,7rem)_1fr] md:gap-10 lg:grid-cols-[minmax(0,7.5rem)_1fr] lg:gap-12">
+                    <div className="pointer-events-none relative z-0 flex justify-center -ml-6 sm:-ml-8 md:justify-start md:-ml-14 lg:-ml-20">
                       <Image
-                        src="/images/doodle_clean_upscaled.png"
-                        alt=""
-                        width={320}
-                        height={320}
-                        className="h-auto w-[min(52%,4.75rem)] object-contain drop-shadow-[0_2px_8px_rgb(0_0_0/0.25)] sm:w-[min(50%,5.25rem)] md:w-[min(48%,5.75rem)]"
-                        sizes="(max-width: 768px) 26vw, 92px"
+                        src="/images/styleguide-winter-kopie.png"
+                        alt="Poule &amp; Poulette — winter"
+                        width={360}
+                        height={480}
+                        className="h-auto w-[min(34vw,6rem)] object-contain opacity-95 drop-shadow-[0_10px_32px_rgb(0_0_0/0.35)] sm:w-28 md:w-full md:max-w-28 lg:max-w-30"
+                        sizes="(max-width: 768px) 34vw, 112px"
                       />
                     </div>
+                    <div className="min-w-0 text-center">
+                      <motion.h1
+                        id={splashTitleId}
+                        layoutId={WORDMARK_LAYOUT_ID}
+                        className={`relative z-10 mx-auto w-full max-w-[min(92vw,44rem)] px-4 ${wordmarkClass}`}
+                        transition={{
+                          type: "spring",
+                          stiffness: 320,
+                          damping: 38,
+                          mass: 0.85,
+                        }}
+                      >
+                        POULE &amp; POULETTE
+                      </motion.h1>
+                      <motion.p
+                        className="font-accent mx-auto mt-6 max-w-2xl text-base text-pp-white/85"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            delay: 0.2,
+                            duration: 0.5,
+                            ease: [0.22, 1, 0.36, 1],
+                          },
+                        }}
+                      >
+                        Dit is de hoofdsite voor elke Poule &amp; Poulette in België
+                        — één merk, alle locaties. We bouwen beweging, 3D en detail
+                        hier laag voor laag uit tot alles even verfijnd voelt als een
+                        bezoek bij jullie.
+                      </motion.p>
+                    </div>
                   </div>
-                </div>
-                <div className="relative z-30 mx-auto max-w-6xl text-center">
-                  {!splashActive ? (
-                    <motion.h1
-                      id={splashTitleId}
-                      layoutId={WORDMARK_LAYOUT_ID}
-                      className={`relative z-10 mx-auto mt-4 w-full max-w-[min(92vw,44rem)] px-4 ${wordmarkClass}`}
-                      transition={{
-                        type: "spring",
-                        stiffness: 320,
-                        damping: 38,
-                        mass: 0.85,
-                      }}
-                    >
-                      POULE &amp; POULETTE
-                    </motion.h1>
-                  ) : null}
-
-                  {!splashActive ? (
-                    <motion.p
-                      className="font-accent mx-auto mt-6 max-w-2xl text-base text-pp-white/85"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        transition: {
-                          delay: 0.2,
-                          duration: 0.5,
-                          ease: [0.22, 1, 0.36, 1],
-                        },
-                      }}
-                    >
-                      Dit is de hoofdsite voor elke Poule &amp; Poulette in België
-                      — één merk, alle locaties. We bouwen beweging, 3D en detail
-                      hier laag voor laag uit tot alles even verfijnd voelt als een
-                      bezoek bij jullie.
-                    </motion.p>
-                  ) : null}
-                </div>
+                ) : null}
               </div>
             </section>
 
