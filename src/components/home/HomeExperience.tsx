@@ -291,10 +291,10 @@ export function HomeExperience() {
                   </video>
                 )}
                 <div
-                  className="pointer-events-none absolute inset-0 z-1 overflow-hidden"
+                  className="pointer-events-none absolute inset-0 z-1 flex items-center justify-center overflow-hidden"
                   aria-hidden
                 >
-                  <div className="absolute left-1/2 top-1/2 h-[128%] w-[128%] -translate-x-[51%] -translate-y-1/2 -rotate-[4deg] md:h-[132%] md:w-[132%] md:-translate-x-[52%] md:-rotate-[5deg]">
+                  <div className="relative mx-auto h-[min(82vh,calc(min(96vw,90rem)*9/16))] w-[min(96vw,90rem)] max-w-full">
                     <Image
                       src="/images/frame_transparent.png"
                       alt=""
