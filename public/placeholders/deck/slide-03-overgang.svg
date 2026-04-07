@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="Placeholder overgang 03">
+  <rect width="1920" height="1080" fill="#fbfbf1"/>
+  <rect x="0" y="0" width="1920" height="180" fill="#1c3834"/>
+  <text x="960" y="115" text-anchor="middle" fill="#fdf8c1" font-family="system-ui,sans-serif" font-size="36" font-weight="600">PLACEHOLDER — overgang 03</text>
+  <text x="960" y="580" text-anchor="middle" fill="#1c3834" font-family="system-ui,sans-serif" font-size="38" opacity="0.85">Lichte slide — typografie of foto hier</text>
+  <text x="960" y="640" text-anchor="middle" fill="#060709" font-family="system-ui,sans-serif" font-size="22" opacity="0.5">Export naar .webp indien gewenst</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="Placeholder overgang 04">
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0.5" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#1c3834"/>
+      <stop offset="50%" stop-color="#f495bd"/>
+      <stop offset="100%" stop-color="#1c3834"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="#060709"/>
+  <rect x="0" y="390" width="1920" height="300" fill="url(#g4)" opacity="0.35"/>
+  <text x="960" y="520" text-anchor="middle" fill="#fdf8c1" font-family="system-ui,sans-serif" font-size="44" font-weight="600">PLACEHOLDER — overgang 04</text>
+  <text x="960" y="580" text-anchor="middle" fill="#fbfbf1" font-family="system-ui,sans-serif" font-size="22" opacity="0.7">Einde deck — hier komt o.a. CTA of contact</text>
+</svg>
