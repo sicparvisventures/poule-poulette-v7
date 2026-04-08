@@ -47,17 +47,23 @@ export const deckSlides: DeckSlide[] = [
   },
   {
     id: "slide-02",
-    imageSrc: "/placeholders/deck/slide-02.jpg",
+    imageSrc: "/images/slide2v2.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 02",
     title: "Keuken & smaak",
-    body: "Tweede paneel in het horizontale deck. Scroll naar beneden op desktop om horizontaal door te gaan.",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-03",
-    imageSrc: "/placeholders/deck/slide-03.jpg",
+    imageSrc: "/images/slide3.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 03",
     title: "Door het land",
-    body: "Van Antwerpen tot Oostende — dezelfde sfeer op elke locatie. Locaties en beelden vul je centraal op deze site.",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-04",

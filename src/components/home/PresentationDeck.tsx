@@ -25,6 +25,7 @@ import {
   type DeckSlide,
 } from "@/content/deckSlides";
 import { heroDeckMarqueePhrases } from "@/content/marqueeBand";
+import { useViewportWidth } from "@/hooks/useViewportWidth";
 
 const MD = 768;
 
@@ -96,17 +97,6 @@ function useDesktopHorizontalDeck() {
   return ok;
 }
 
-function useViewportWidth() {
-  const [w, setW] = useState(1200);
-  useEffect(() => {
-    const sync = () => setW(window.innerWidth || 1200);
-    sync();
-    window.addEventListener("resize", sync);
-    return () => window.removeEventListener("resize", sync);
-  }, []);
-  return w;
-}
-
 /** Zit half op deze slide, half op de volgende — plakt secties visueel aan elkaar (geen extra scroll-breedte). */
 function DeckSlideSeamSticker() {
   const textClass =
@@ -145,6 +135,102 @@ function DeckSlideSeamSticker() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Desktop slide-paneel — ook gebruikt door `DesktopHorizontalHomeStory`. */
+export function DeckDesktopSlideArticle({
+  slide,
+  i,
+  slideCount,
+  presentatieId,
+}: {
+  slide: DeckSlide;
+  i: number;
+  slideCount: number;
+  /** Eerste slide krijgt `#presentatie` voor ankers. */
+  presentatieId?: string;
+}) {
+  const articleProps =
+    i === 0 && presentatieId
+      ? { id: presentatieId }
+      : ({} as { id?: string });
+
+  /** Rode naad na slide 2 (index 1) uit: vloeiende overgang naar slide 3. */
+  const showSeamAfter =
+    i < slideCount - 1 && i !== 1;
+
+  if (slide.fullBleedImage) {
+    return (
+      <article
+        {...articleProps}
+        className="relative h-full w-screen shrink-0 overflow-visible bg-pp-black"
+        aria-label={`Slide ${i + 1} van ${slideCount}`}
+      >
+        <Image
+          src={slide.imageSrc}
+          alt=""
+          fill
+          className="z-0 object-cover object-center"
+          sizes="100vw"
+          priority={i === 0}
+          unoptimized={deckImageUnoptimized(slide.imageSrc)}
+        />
+        {slide.stickerSrc ? (
+          <div className="pointer-events-none absolute inset-0 z-[20]">
+            <DeckSlideSticker src={slide.stickerSrc} variant="desktop" />
+          </div>
+        ) : null}
+        {showSeamAfter ? <DeckSlideSeamSticker /> : null}
+      </article>
+    );
+  }
+
+  return (
+    <article
+      {...articleProps}
+      className="relative flex h-full w-screen shrink-0 flex-col overflow-visible md:flex-row"
+      aria-label={`Slide ${i + 1} van ${slideCount}`}
+    >
+      <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
+        <Image
+          src={slide.imageSrc}
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="(min-width: 768px) 52vw, 100vw"
+          priority={i === 0}
+          unoptimized={deckImageUnoptimized(slide.imageSrc)}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-black/50 to-transparent md:bg-linear-to-r md:from-transparent md:to-pp-olive/35"
+          aria-hidden
+        />
+      </div>
+      <div className="relative flex flex-1 flex-col justify-center overflow-visible bg-pp-olive px-6 py-8 md:w-[48%] md:px-12 md:py-16 lg:px-20">
+        {slide.stickerSrc ? (
+          <DeckSlideSticker src={slide.stickerSrc} variant="desktop" />
+        ) : null}
+        <div className="relative z-10">
+          <p className="font-accent text-xs tracking-[0.32em] text-pp-lollypop/90 uppercase">
+            {slide.kicker}
+          </p>
+          <h3 className="font-display mt-4 text-[clamp(1.85rem,4.2vw,3.25rem)] leading-tight text-pp-creme">
+            {slide.title}
+          </h3>
+          <DeckSlideBodyParagraphs slide={slide} variant="desktop" />
+          {(() => {
+            const foot = deckSlideAssetFooter(slide);
+            return foot ? (
+              <p className="font-accent mt-8 text-[0.65rem] tracking-[0.2em] text-pp-creme/35 uppercase">
+                {foot}
+              </p>
+            ) : null;
+          })()}
+        </div>
+      </div>
+      {showSeamAfter ? <DeckSlideSeamSticker /> : null}
+    </article>
   );
 }
 
@@ -204,7 +290,7 @@ function PresentationDeckMobile({
                     src={slide.imageSrc}
                     alt=""
                     fill
-                    className={`z-0 object-center ${i >= 1 ? "object-cover" : "object-contain"}`}
+                    className="z-0 object-cover object-center"
                     sizes="100vw"
                     priority={i === 0}
                     unoptimized={deckImageUnoptimized(slide.imageSrc)}
@@ -316,95 +402,28 @@ function PresentationDeckDesktop({
           className="flex h-full w-max flex-row will-change-transform"
           style={{ x }}
         >
-          {deckSlides.map((slide, i) => {
-            /** Rode naad na slide 2 (index 1) uit: vloeiende overgang naar slide 3. */
-            const showSeamAfter = i < slideCount - 1 && i !== 1;
-            return slide.fullBleedImage ? (
-              <article
-                key={slide.id}
-                className="relative h-full w-screen shrink-0 overflow-visible bg-pp-black"
-                aria-label={`Slide ${i + 1} van ${slideCount}`}
-              >
-                <Image
-                  src={slide.imageSrc}
-                  alt=""
-                  fill
-                  className={`z-0 object-center ${i >= 1 ? "object-cover" : "object-contain"}`}
-                  sizes="100vw"
-                  priority={i === 0}
-                  unoptimized={deckImageUnoptimized(slide.imageSrc)}
-                />
-                {slide.stickerSrc ? (
-                  <div className="pointer-events-none absolute inset-0 z-[20]">
-                    <DeckSlideSticker
-                      src={slide.stickerSrc}
-                      variant="desktop"
-                    />
-                  </div>
-                ) : null}
-                {showSeamAfter ? <DeckSlideSeamSticker /> : null}
-              </article>
-            ) : (
-              <article
-                key={slide.id}
-                className="relative flex h-full w-screen shrink-0 flex-col overflow-visible md:flex-row"
-                aria-label={`Slide ${i + 1} van ${slideCount}`}
-              >
-                <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
-                  <Image
-                    src={slide.imageSrc}
-                    alt=""
-                    fill
-                    className="object-cover object-center"
-                    sizes="(min-width: 768px) 52vw, 100vw"
-                    priority={i === 0}
-                    unoptimized={deckImageUnoptimized(slide.imageSrc)}
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-black/50 to-transparent md:bg-linear-to-r md:from-transparent md:to-pp-olive/35"
-                    aria-hidden
-                  />
-                </div>
-                <div className="relative flex flex-1 flex-col justify-center overflow-visible bg-pp-olive px-6 py-8 md:w-[48%] md:px-12 md:py-16 lg:px-20">
-                  {slide.stickerSrc ? (
-                    <DeckSlideSticker src={slide.stickerSrc} variant="desktop" />
-                  ) : null}
-                  <div className="relative z-10">
-                    <p className="font-accent text-xs tracking-[0.32em] text-pp-lollypop/90 uppercase">
-                      {slide.kicker}
-                    </p>
-                    <h3 className="font-display mt-4 text-[clamp(1.85rem,4.2vw,3.25rem)] leading-tight text-pp-creme">
-                      {slide.title}
-                    </h3>
-                    <DeckSlideBodyParagraphs slide={slide} variant="desktop" />
-                    {(() => {
-                      const foot = deckSlideAssetFooter(slide);
-                      return foot ? (
-                        <p className="font-accent mt-8 text-[0.65rem] tracking-[0.2em] text-pp-creme/35 uppercase">
-                          {foot}
-                        </p>
-                      ) : null;
-                    })()}
-                  </div>
-                </div>
-                {showSeamAfter ? <DeckSlideSeamSticker /> : null}
-              </article>
-            );
-          })}
+          {deckSlides.map((slide, i) => (
+            <DeckDesktopSlideArticle
+              key={slide.id}
+              slide={slide}
+              i={i}
+              slideCount={slideCount}
+            />
+          ))}
         </motion.div>
 
         <div
           className="pointer-events-none absolute bottom-6 left-1/2 z-20 -translate-x-1/2 font-accent text-[0.65rem] tracking-[0.28em] text-pp-creme/40 uppercase"
           aria-hidden
         >
-          Verticaal scrollen · horizontaal paneel
+          Scroll omlaag · horizontaal door de site
         </div>
       </div>
     </section>
   );
 }
 
-function DeckProgressIndicator({
+export function DeckProgressIndicator({
   progress,
   count,
 }: {
@@ -422,13 +441,15 @@ function DeckProgressIndicator({
   );
 
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-pp-creme/20 bg-pp-olive/45 px-3 py-2 backdrop-blur-sm">
+    <div className="pointer-events-auto flex items-center gap-[5px] rounded-full border border-pp-creme/18 bg-pp-black/25 px-3.5 py-2 shadow-[0_4px_24px_rgb(0_0_0/0.2)] backdrop-blur-md">
       <span className="sr-only">Voortgang door het deck</span>
       {Array.from({ length: count }, (_, i) => (
         <span
           key={i}
-          className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${
-            i === active ? "bg-pp-lollypop" : "bg-pp-creme/25"
+          className={`rounded-full transition-[background-color,transform] duration-300 ${
+            i === active
+              ? "h-[7px] w-[7px] scale-100 bg-pp-lollypop shadow-[0_0_10px_rgb(244_149_189/0.45)]"
+              : "h-[5px] w-[5px] bg-pp-creme/22"
           }`}
           aria-hidden
         />
