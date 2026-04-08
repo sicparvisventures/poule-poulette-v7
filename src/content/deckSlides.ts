@@ -37,7 +37,7 @@ export function deckSlideAssetFooter(slide: DeckSlide): string | null {
 export const deckSlides: DeckSlide[] = [
   {
     id: "slide-01",
-    imageSrc: "/images/slide1.svg",
+    imageSrc: "/images/slide1v2.svg",
     fullBleedImage: true,
     stickerSrc: "/images/kroonroze.png",
     kicker: "",

@@ -24,6 +24,7 @@ import {
   deckSlides,
   type DeckSlide,
 } from "@/content/deckSlides";
+import { heroDeckMarqueePhrases } from "@/content/marqueeBand";
 
 const MD = 768;
 
@@ -66,8 +67,8 @@ function DeckSlideSticker({
 }) {
   const wrap =
     variant === "mobile"
-      ? "pointer-events-none absolute -right-2 bottom-8 z-[1] w-[min(46vw,9.5rem)] rotate-[11deg] drop-shadow-[0_12px_28px_rgb(0_0_0/0.35)] sm:w-36"
-      : "pointer-events-none absolute -right-1 bottom-[14%] z-[1] w-[min(40vw,11rem)] rotate-[13deg] drop-shadow-[0_14px_36px_rgb(0_0_0/0.4)] md:bottom-[18%] md:-right-2 md:w-[min(36vw,12rem)]";
+      ? "pointer-events-none absolute -right-2 bottom-44 z-[1] w-[min(46vw,9.5rem)] rotate-[11deg] drop-shadow-[0_12px_28px_rgb(0_0_0/0.35)] sm:bottom-52 sm:w-36"
+      : "pointer-events-none absolute -right-1 bottom-[54%] z-[1] w-[min(40vw,11rem)] rotate-[13deg] drop-shadow-[0_14px_36px_rgb(0_0_0/0.4)] md:bottom-[60%] md:-right-2 md:w-[min(36vw,12rem)]";
   return (
     <div className={wrap} aria-hidden>
       <div className="relative aspect-square w-full">
@@ -104,6 +105,47 @@ function useViewportWidth() {
     return () => window.removeEventListener("resize", sync);
   }, []);
   return w;
+}
+
+/** Zit half op deze slide, half op de volgende — plakt secties visueel aan elkaar (geen extra scroll-breedte). */
+function DeckSlideSeamSticker() {
+  const textClass =
+    "inline-block text-center font-display text-[0.95rem] italic leading-snug tracking-[0.12em] text-pp-creme uppercase [text-orientation:mixed] [writing-mode:vertical-rl] sm:text-[1.1rem] sm:tracking-[0.14em]";
+  const dotClass =
+    "inline-block font-display text-[1.6rem] not-italic leading-none text-pp-creme sm:text-[1.85rem]";
+
+  const marqueeColumn = (suffix: string) => (
+    <span className={`${textClass} shrink-0`}>
+      {heroDeckMarqueePhrases.flatMap((phrase, idx) => [
+        idx > 0 ? (
+          <span key={`${suffix}-dot-${idx}`} className={dotClass} aria-hidden>
+            ●
+          </span>
+        ) : null,
+        <span key={`${suffix}-${phrase}`}>{phrase}</span>,
+      ])}
+      <span key={`${suffix}-dot-end`} className={dotClass} aria-hidden>
+        ●
+      </span>
+    </span>
+  );
+
+  return (
+    <div
+      className="pointer-events-none absolute top-0 right-0 bottom-0 z-[13] w-[3.25rem] translate-x-1/2 overflow-hidden bg-pp-christmas shadow-[inset_0_0_0_1px_rgb(253_248_193/0.38),3px_0_18px_rgb(0_0_0/0.42)] sm:w-[3.75rem]"
+      aria-hidden
+      role="presentation"
+    >
+      <div className="flex h-full items-center justify-center overflow-hidden px-0.5">
+        <div className="pp-deck-vertical-marquee-inner">
+          {marqueeColumn("a")}
+          <span className="inline-block shrink-0" aria-hidden>
+            {marqueeColumn("b")}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function PresentationDeck() {
@@ -291,18 +333,19 @@ function PresentationDeckDesktop({
                   unoptimized={deckImageUnoptimized(slide.imageSrc)}
                 />
                 {slide.stickerSrc ? (
-                  <div className="pointer-events-none absolute inset-0 z-10">
+                  <div className="pointer-events-none absolute inset-0 z-[20]">
                     <DeckSlideSticker
                       src={slide.stickerSrc}
                       variant="desktop"
                     />
                   </div>
                 ) : null}
+                {i < slideCount - 1 ? <DeckSlideSeamSticker /> : null}
               </article>
             ) : (
               <article
                 key={slide.id}
-                className="relative flex h-full w-screen shrink-0 flex-col md:flex-row"
+                className="relative flex h-full w-screen shrink-0 flex-col overflow-visible md:flex-row"
                 aria-label={`Slide ${i + 1} van ${slideCount}`}
               >
                 <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
@@ -342,6 +385,7 @@ function PresentationDeckDesktop({
                     })()}
                   </div>
                 </div>
+                {i < slideCount - 1 ? <DeckSlideSeamSticker /> : null}
               </article>
             ),
           )}
