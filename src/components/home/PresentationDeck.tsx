@@ -26,6 +26,10 @@ import {
 } from "@/content/deckSlides";
 import { heroDeckMarqueePhrases } from "@/content/marqueeBand";
 import { useViewportWidth } from "@/hooks/useViewportWidth";
+import {
+  DeckSlide2PolaroidCluster,
+  DeckSlidePolaroidCollage,
+} from "@/components/home/DeckSlidePolaroidCollage";
 
 const MD = 768;
 
@@ -156,9 +160,11 @@ export function DeckDesktopSlideArticle({
       ? { id: presentatieId }
       : ({} as { id?: string });
 
-  /** Rode naad na slide 2 (index 1) uit: vloeiende overgang naar slide 3. */
+  /**
+   * Rode naad uit na slide 2 (i=1) en na slide 3 (i=2): illustraties lopen naadloos door.
+   */
   const showSeamAfter =
-    i < slideCount - 1 && i !== 1;
+    i < slideCount - 1 && i !== 1 && i !== 2;
 
   if (slide.fullBleedImage) {
     return (
@@ -176,6 +182,10 @@ export function DeckDesktopSlideArticle({
           priority={i === 0}
           unoptimized={deckImageUnoptimized(slide.imageSrc)}
         />
+        {slide.deckPolaroidsRightCluster ? (
+          <DeckSlide2PolaroidCluster />
+        ) : null}
+        {slide.deckPolaroidsLeft ? <DeckSlidePolaroidCollage /> : null}
         {slide.stickerSrc ? (
           <div className="pointer-events-none absolute inset-0 z-[20]">
             <DeckSlideSticker src={slide.stickerSrc} variant="desktop" />
@@ -278,11 +288,16 @@ function PresentationDeckMobile({
         </p>
       </div>
       <ol className="flex flex-col gap-0">
-        {deckSlides.map((slide, i) => (
-          <li
-            key={slide.id}
-            className="border-t border-pp-olive/10 first:border-t-0"
-          >
+        {deckSlides.map((slide, i) => {
+          const prev = i > 0 ? deckSlides[i - 1] : undefined;
+          const seamlessFullBleed =
+            Boolean(slide.fullBleedImage && prev?.fullBleedImage);
+          const liBorder =
+            i > 0 && !seamlessFullBleed
+              ? "border-t border-pp-olive/10"
+              : "";
+          return (
+          <li key={slide.id} className={liBorder}>
             {slide.fullBleedImage ? (
               <article aria-label={`Slide ${i + 1} van ${slideCount}`}>
                 <div className="relative aspect-16/10 w-full min-h-[min(52vh,480px)] overflow-visible bg-pp-black md:min-h-[min(70vh,560px)]">
@@ -295,6 +310,9 @@ function PresentationDeckMobile({
                     priority={i === 0}
                     unoptimized={deckImageUnoptimized(slide.imageSrc)}
                   />
+                  {slide.deckPolaroidsLeft ? (
+                    <DeckSlidePolaroidCollage />
+                  ) : null}
                   {slide.stickerSrc ? (
                     <div className="pointer-events-none absolute inset-0 z-10">
                       <DeckSlideSticker
@@ -343,7 +361,8 @@ function PresentationDeckMobile({
               </article>
             )}
           </li>
-        ))}
+          );
+        })}
       </ol>
       <p className="sr-only">{slideCount} slides in dit deel</p>
     </section>

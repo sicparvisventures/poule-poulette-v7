@@ -16,6 +16,10 @@ export type DeckSlide = {
    * Gebruik bij brede illustraties die over het hele scherm doorlopen.
    */
   fullBleedImage?: boolean;
+  /** Polaroid-collage links (zelfde beelden als splash), o.a. slide 3. */
+  deckPolaroidsLeft?: boolean;
+  /** Desktop: polaroids rechts op dit paneel (slide 2 i.v.m. naad naar slide 3). */
+  deckPolaroidsRightCluster?: boolean;
   /**
    * Voettekst onder het body-blok.
    * - `undefined`: standaard placeholder voor ontwerpers.
@@ -49,6 +53,7 @@ export const deckSlides: DeckSlide[] = [
     id: "slide-02",
     imageSrc: "/images/slide2v2.svg",
     fullBleedImage: true,
+    deckPolaroidsRightCluster: true,
     /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 02",
     title: "Keuken & smaak",
@@ -57,8 +62,9 @@ export const deckSlides: DeckSlide[] = [
   },
   {
     id: "slide-03",
-    imageSrc: "/images/slide3.svg",
+    imageSrc: "/images/3.svg",
     fullBleedImage: true,
+    deckPolaroidsLeft: true,
     /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 03",
     title: "Door het land",
@@ -67,9 +73,12 @@ export const deckSlides: DeckSlide[] = [
   },
   {
     id: "slide-04",
-    imageSrc: "/placeholders/deck/slide-04-overgang.svg",
+    imageSrc: "/images/4.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Volgende stap",
     title: "Kom langs",
-    body: "Call-to-action placeholder: reservatie, openingsuren, adres — nog in te vullen.",
+    body: "",
+    assetFooter: false,
   },
 ];

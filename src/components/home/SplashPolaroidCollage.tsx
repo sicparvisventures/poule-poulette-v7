@@ -1,12 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { useState } from "react";
-import {
-  splashPolaroidFallbackSrc,
-  splashPolaroidItems,
-} from "@/content/splashPolaroids";
+import { splashPolaroidItems } from "@/content/splashPolaroids";
+import { PolaroidFrame } from "@/components/home/PolaroidFrame";
 
 type Props = { reduceMotion: boolean | null };
 
@@ -80,36 +76,5 @@ function PolaroidSlot({
         <PolaroidFrame item={item} />
       </motion.div>
     </motion.div>
-  );
-}
-
-function PolaroidFrame({
-  item,
-}: {
-  item: (typeof splashPolaroidItems)[number];
-}) {
-  const [src, setSrc] = useState(item.src);
-
-  return (
-    <div className="rounded-[2px] border border-pp-white/85 bg-pp-white p-1.5 pb-2.5 shadow-[0_1px_0_rgb(255_255_255/0.35)_inset] sm:p-2 sm:pb-3">
-      <div className="relative aspect-4/5 w-full overflow-hidden bg-pp-olive/8 ring-1 ring-pp-olive/12">
-        <Image
-          src={src}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 140px, (max-width: 1024px) 180px, 220px"
-          priority
-          onError={() => {
-            if (src !== splashPolaroidFallbackSrc) {
-              setSrc(splashPolaroidFallbackSrc);
-            }
-          }}
-        />
-      </div>
-      <p className="font-accent mt-1.5 text-center text-[0.5rem] tracking-[0.3em] text-pp-olive uppercase sm:mt-2 sm:text-[0.54rem]">
-        {item.caption}
-      </p>
-    </div>
   );
 }
