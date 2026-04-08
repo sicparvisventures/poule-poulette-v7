@@ -17,36 +17,36 @@ export const splashPolaroidItems: readonly SplashPolaroidItem[] = [
     src: "/splash-polaroids/01-terras.jpg",
     alt: "Terras en sfeer bij Poule & Poulette, Place Jourdan Brussel",
     caption: "Brussel",
-    rotateDeg: -8,
+    rotateDeg: -5,
     positionClass:
-      "-left-[2%] top-[4%] w-[min(44vw,10.5rem)] sm:-left-[1%] sm:top-[5%] sm:w-[min(38vw,12rem)] md:left-[1%] md:top-[6%] md:w-[min(32vw,13.5rem)] lg:w-[min(28vw,14rem)]",
+      "left-[2%] top-[10%] w-[min(30vw,7.25rem)] sm:left-[3%] sm:top-[11%] sm:w-[min(26vw,8.25rem)] md:left-[4%] md:top-[12%] md:w-[min(22vw,9rem)] lg:w-[min(18vw,9.5rem)]",
     floatDelay: 0,
   },
   {
     src: "/splash-polaroids/02-opening.jpg",
     alt: "Opening en feestelijk moment Poule & Poulette Gent",
     caption: "Gent",
-    rotateDeg: 7,
+    rotateDeg: 4,
     positionClass:
-      "-right-[2%] top-[6%] w-[min(44vw,10.5rem)] sm:-right-[1%] sm:top-[7%] sm:w-[min(38vw,12rem)] md:right-[1%] md:top-[8%] md:w-[min(32vw,13.5rem)] lg:w-[min(28vw,14rem)]",
+      "right-[2%] top-[11%] w-[min(30vw,7.25rem)] sm:right-[3%] sm:top-[12%] sm:w-[min(26vw,8.25rem)] md:right-[4%] md:top-[13%] md:w-[min(22vw,9rem)] lg:w-[min(18vw,9.5rem)]",
     floatDelay: 0.35,
   },
   {
     src: "/splash-polaroids/03-food.jpg",
     alt: "Gerecht en presentatie Poule & Poulette",
     caption: "Op tafel",
-    rotateDeg: 5,
+    rotateDeg: 3,
     positionClass:
-      "-left-[3%] bottom-[12%] w-[min(40vw,9.75rem)] sm:-left-[2%] sm:bottom-[14%] sm:w-[min(34vw,11.25rem)] md:left-[0%] md:bottom-[15%] md:w-[min(30vw,12.5rem)] lg:w-[min(26vw,13rem)]",
+      "left-[2%] bottom-[16%] w-[min(28vw,6.75rem)] sm:left-[3%] sm:bottom-[17%] sm:w-[min(24vw,7.75rem)] md:left-[4%] md:bottom-[18%] md:w-[min(20vw,8.5rem)] lg:w-[min(17vw,9rem)]",
     floatDelay: 0.7,
   },
   {
     src: "/splash-polaroids/04-mechelen.jpg",
     alt: "Poule & Poulette Mechelen, sfeerbeeld",
     caption: "Mechelen",
-    rotateDeg: -6,
+    rotateDeg: -4,
     positionClass:
-      "-right-[3%] bottom-[10%] w-[min(40vw,9.75rem)] sm:-right-[2%] sm:bottom-[12%] sm:w-[min(34vw,11.25rem)] md:right-[0%] md:bottom-[13%] md:w-[min(30vw,12.5rem)] lg:w-[min(26vw,13rem)]",
+      "right-[2%] bottom-[15%] w-[min(28vw,6.75rem)] sm:right-[3%] sm:bottom-[16%] sm:w-[min(24vw,7.75rem)] md:right-[4%] md:bottom-[17%] md:w-[min(20vw,8.5rem)] lg:w-[min(17vw,9rem)]",
     floatDelay: 1.05,
   },
 ] as const;

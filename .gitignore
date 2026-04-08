@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 .venv-cursor
+.venv-img
 *.pem
 
 # debug

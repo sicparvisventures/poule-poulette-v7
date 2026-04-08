@@ -36,7 +36,7 @@ function PolaroidSlot({
   still: boolean;
 }) {
   const inner = (
-    <div className="origin-center drop-shadow-[0_14px_32px_rgb(0_0_0/0.38)]">
+    <div className="origin-center drop-shadow-[0_16px_40px_rgb(0_0_0/0.55)]">
       <PolaroidFrame item={item} />
     </div>
   );
@@ -67,15 +67,15 @@ function PolaroidSlot({
       }}
     >
       <motion.div
-        animate={{ y: [0, -5, 0] }}
+        animate={{ y: [0, -3, 0] }}
         transition={{
-          duration: 4.1 + (i % 3) * 0.4,
+          duration: 5.2 + (i % 3) * 0.35,
           repeat: Infinity,
           ease: "easeInOut",
           delay: item.floatDelay,
         }}
         style={{ rotate: item.rotateDeg }}
-        className="origin-center drop-shadow-[0_14px_32px_rgb(0_0_0/0.38)]"
+        className="origin-center drop-shadow-[0_16px_40px_rgb(0_0_0/0.55)]"
       >
         <PolaroidFrame item={item} />
       </motion.div>
@@ -91,8 +91,8 @@ function PolaroidFrame({
   const [src, setSrc] = useState(item.src);
 
   return (
-    <div className="rounded-[2px] border border-pp-white/30 bg-pp-white p-2 pb-3 shadow-[0_1px_0_rgb(255_255_255/0.08)_inset] sm:p-2.5 sm:pb-3.5">
-      <div className="relative aspect-4/5 w-full overflow-hidden bg-pp-black/10 ring-1 ring-pp-black/6">
+    <div className="rounded-[2px] border border-pp-white/85 bg-pp-white p-1.5 pb-2.5 shadow-[0_1px_0_rgb(255_255_255/0.35)_inset] sm:p-2 sm:pb-3">
+      <div className="relative aspect-4/5 w-full overflow-hidden bg-pp-olive/8 ring-1 ring-pp-olive/12">
         <Image
           src={src}
           alt=""
@@ -107,7 +107,7 @@ function PolaroidFrame({
           }}
         />
       </div>
-      <p className="font-accent mt-2 text-center text-[0.52rem] tracking-[0.28em] text-pp-olive/78 uppercase sm:text-[0.58rem]">
+      <p className="font-accent mt-1.5 text-center text-[0.5rem] tracking-[0.3em] text-pp-olive uppercase sm:mt-2 sm:text-[0.54rem]">
         {item.caption}
       </p>
     </div>

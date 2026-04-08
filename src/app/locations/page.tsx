@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
-import { LocationsIndexContent } from "@/components/locations/LocationsIndexContent";
-import {
-  brandCitiesLine,
-  brandTagline,
-  chainLocations,
-} from "@/content/locations";
+import { LocationsVirtualExperience } from "@/components/locations/LocationsVirtualExperience";
+import { brandCitiesLine, locationsPageCopy } from "@/content/locations";
 
 export const metadata: Metadata = {
   title: "Locaties",
-  description: `Poule & Poulette — alle vestigingen in België. ${brandTagline}. ${brandCitiesLine}`,
+  description: `Poule & Poulette — virtuele rondreis langs alle vestigingen. ${locationsPageCopy.intro} ${brandCitiesLine}`,
 };
 
 export default function LocationsPage() {
-  return (
-    <div className="flex min-h-dvh flex-col bg-pp-white text-pp-black">
-      <LocationsIndexContent locations={chainLocations} />
-    </div>
-  );
+  return <LocationsVirtualExperience />;
 }

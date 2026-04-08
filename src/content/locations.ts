@@ -152,3 +152,37 @@ export function getLocationBySlug(slug: string): ChainLocation | undefined {
 export function getLocationSlugs(): string[] {
   return chainLocations.map((l) => l.id);
 }
+
+/** Google Maps (app / web) — zoek op vrije query. */
+export function googleMapsSearchUrl(mapsQuery: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`;
+}
+
+/**
+ * Embed-URL zonder API-key (klassiek Google Maps iframe).
+ * Werkt voor de meeste adres- en naam-queries; anders helpt de knop “Open in Google Maps”.
+ */
+export function googleMapsEmbedSrc(mapsQuery: string): string {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(mapsQuery)}&z=15&output=embed&hl=nl&iwloc=near`;
+}
+
+/** Marquee onder de header op /locations — zelfde vibe als /menu. */
+export const locationsMarqueePhrases = [
+  "KIES JE STAD · ZELFDE MERK",
+  "ANTWERPEN · BRUSSEL · BRUGGE · GENT · LEUVEN · MECHELEN · OOSTENDE",
+  "GOOD CHICKEN · GOOD MOOD",
+  "LOKALE AANWEZIGHEID · ÉÉN VERZORGDE SITE",
+  "POULE & POULETTE",
+] as const;
+
+/** Teksten voor de virtuele locaties-ervaring (/locations). */
+export const locationsPageCopy = {
+  kicker: "Poule & Poulette",
+  title: "Virtuele locaties",
+  intro:
+    "Scroll om door alle vestigingen te bladeren. Tik op een locatie om het beeld groter te bekijken — straks met route en alle praktische gegevens per adres.",
+  scrollHint: "Scroll omlaag om verder te gaan · tik om te vergroten",
+  zoomClose: "Sluit vergroting",
+  footnote:
+    "Adressen en openingsuren worden per vestiging geüpdatet. Voor reserveren en actuele info: open de pagina van je dichtstbijzijnde restaurant.",
+} as const;
