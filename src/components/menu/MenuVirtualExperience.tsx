@@ -487,6 +487,17 @@ export function MenuVirtualExperience() {
       <MenuPageChrome />
       <MenuMarqueeBand />
 
+      {showMenuNote ? (
+        <FixedPageIntroStrip
+          labelId={labelId}
+          title={menuPageCopy.title}
+          introBar={menuPageCopy.introBar}
+          reduceMotion={reduceMotion}
+          onDismiss={() => setShowMenuNote(false)}
+          dismissAriaLabel="Verberg menu-uitleg"
+        />
+      ) : null}
+
       <div
         ref={scrollRootRef}
         className="relative"
@@ -546,17 +557,6 @@ export function MenuVirtualExperience() {
           <div
             className={`relative z-10 flex min-h-0 flex-1 flex-col ${showMenuNote ? "pt-[3.25rem] sm:pt-12" : ""}`}
           >
-            {showMenuNote ? (
-              <FixedPageIntroStrip
-                labelId={labelId}
-                title={menuPageCopy.title}
-                introBar={menuPageCopy.introBar}
-                reduceMotion={reduceMotion}
-                onDismiss={() => setShowMenuNote(false)}
-                dismissAriaLabel="Verberg menu-uitleg"
-              />
-            ) : null}
-
             <div className="shrink-0 px-4 pb-0 pt-1 sm:px-5 md:pt-1">
               <div className="mx-auto max-w-3xl">
                 <WavyConnector compact />
