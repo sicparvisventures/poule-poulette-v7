@@ -1,11 +1,14 @@
 /**
  * Keten-brede locaties — bron voor /locations en gerelateerde UI.
- * Beelden onder /public/locations/ (kopieën uit ppsitev/assets-source).
+ * Beelden onder /public/locations/. Adressen en uren afgestemd op poulepoulette.com/locaties (2026).
  */
 
 export const brandTagline = "Fun loving food moments" as const;
 
-/** Korte opsomming voor meta / locations-intro; sluit aan bij poulepoulette.com/locaties. */
+/** Officiële overzichtspagina — o.a. Etterbeek, Merode, Brussels Expo. */
+export const officialLocationsUrl = "https://poulepoulette.com/locaties/" as const;
+
+/** Korte opsomming voor meta / splash; sluit aan bij poulepoulette.com/locaties. */
 export const brandCitiesLine =
   "Antwerpen Eilandje · Brussel · Etterbeek · Gent · Leuven · Mechelen · Oostende · Merode · Brugge · Brussels Expo" as const;
 
@@ -30,118 +33,149 @@ export type ChainLocation = {
   mapsQuery: string;
   imageSrc: string;
   imageAlt: string;
-  /** Introductie op /locations/[slug]. */
+  /** Introductie op /locations/[slug] en in de zoom-pop-up. */
   detailIntro: string;
+  /** Optioneel: openingsurenregels zoals op de officiële site. */
+  openingHours?: readonly string[];
   videoSrc?: string | null;
 };
 
 /**
- * Vaste volgorde voor het grid. Niet-Mechelen: placeholder adresregels tot definitieve data.
+ * Vaste volgorde voor het mozaïek (7 steden). Zie ook officialLocationsUrl voor extra filialen.
  */
 export const chainLocations: ChainLocation[] = [
   {
     id: "antwerpen",
-    city: "Antwerpen",
-    title: "Poule & Poulette Antwerpen",
-    addressLines: [
-      "Adres en openingsuren worden op deze site geüpdatet.",
-      "Reserveren: contact volgt zodra gepubliceerd.",
-    ],
-    tel: "",
-    telHref: "",
-    mail: "",
-    mapsQuery: "Poule Poulette Antwerpen",
+    city: "Antwerpen (Eilandje)",
+    title: "Poule & Poulette — het Eilandje",
+    addressLines: ["Godefriduskaai 2", "2000 Antwerpen"],
+    tel: "+32 3 283 83 22",
+    telHref: "tel:+3232838322",
+    mail: "GK2@poulepoulette.com",
+    mapsQuery: "Poule Poulette Godefriduskaai 2 Antwerpen",
     imageSrc: locImg.antwerpen,
-    imageAlt: "Poule & Poulette — sfeerbeeld Antwerpen",
+    imageAlt: "Poule & Poulette Antwerpen Eilandje — terras aan het water",
     detailIntro:
-      "Antwerpen krijgt dezelfde warme tafel als overal in de keten: straks met concreet adres, openingsuren en een vlotte route naar jullie deur.",
+      "Aan de voet van het MAS, aan het water van het Eilandje: ons Antwerpse kippenhok met zicht op de jachthaven. 7/7 open voor lunch en diner in typische Poule & Poulette-sfeer.",
+    openingHours: [
+      "Ma–do: 11:45–14:30 & 17:00–21:30",
+      "Vr: 11:45–14:30 & 17:00–22:00",
+      "Za: 11:45–22:00",
+      "Zo: 11:45–21:00",
+    ],
   },
   {
     id: "brussel",
     city: "Brussel",
-    title: "Poule & Poulette Brussel",
+    title: "Poule & Poulette — Sainte-Catherine",
     addressLines: [
-      "Adres en openingsuren worden op deze site geüpdatet.",
-      "Meerdere wijken mogelijk — check binnenkort per vestiging.",
+      "Sint-Katelijneplein 2",
+      "1000 Brussel",
+      "Tip: ook Etterbeek (Place Jourdan), Merode en Brussels Expo — zie officiële locatiespagina.",
     ],
     tel: "",
     telHref: "",
     mail: "",
-    mapsQuery: "Poule Poulette Brussel Place Jourdan",
+    mapsQuery: "Poule Poulette Sint-Katelijneplein 2 Brussel",
     imageSrc: locImg.brussel,
-    imageAlt: "Terras en sfeer Poule & Poulette Brussel",
+    imageAlt: "Poule & Poulette Brussel — Sint-Katelijneplein",
     detailIntro:
-      "Van Place Jourdan tot de rest van het Brussels gewest: één merk, lokale aanwezigheid. Hier vullen we binnenkort het exacte adres en alle praktische info aan.",
+      "Centraal op het levendige Sint-Katelijneplein. Het merk heeft ook een vestiging op Place Jourdan (Etterbeek), aan Merode en een stand op Brussels Expo tijdens grote beurzen — alle praktische info en reserveren via poulepoulette.com/locaties.",
+    openingHours: [
+      "Ma–vr: 11:45–14:30 & 17:30–21:30",
+      "Za: 11:30–22:00",
+      "Zo: 11:30–21:00",
+    ],
   },
   {
     id: "brugge",
     city: "Brugge",
-    title: "Poule & Poulette Brugge",
-    addressLines: ["Adres en openingsuren worden op deze site geüpdatet."],
-    tel: "",
-    telHref: "",
-    mail: "",
-    mapsQuery: "Poule Poulette Brugge",
+    title: "Poule & Poulette — Simon Stevinplein",
+    addressLines: ["Simon Stevinplein 3", "8000 Brugge"],
+    tel: "+32 50 89 37 00",
+    telHref: "tel:+3250893700",
+    mail: "SS3@poulepoulette.com",
+    mapsQuery: "Poule Poulette Simon Stevinplein 3 Brugge",
     imageSrc: locImg.brugge,
-    imageAlt: "Poule & Poulette — sfeerbeeld Brugge",
+    imageAlt: "Poule & Poulette Brugge — historisch centrum",
     detailIntro:
-      "Brugge verdient het volledige Poule & Poulette-gevoel: vers aan tafel, zonder gedoe. Adres en uren volgen zodra ze vastliggen.",
+      "Op het pittoreske Simon Stevinplein, tussen Steenstraat en Oude Burg: midden in het historische hart, met hetzelfde funky interieur en shared plates als overal in de keten.",
+    openingHours: [
+      "Ma–do: 11:00–21:00",
+      "Vr–za: 11:00–22:00",
+      "Zo: 11:00–21:00",
+    ],
   },
   {
     id: "gent",
     city: "Gent",
-    title: "Poule & Poulette Gent",
-    addressLines: ["Adres en openingsuren worden op deze site geüpdatet."],
+    title: "Poule & Poulette — Korenmarkt",
+    addressLines: ["Korenmarkt 11", "9000 Gent"],
     tel: "",
     telHref: "",
     mail: "",
-    mapsQuery: "Poule Poulette Gent",
+    mapsQuery: "Poule Poulette Korenmarkt 11 Gent",
     imageSrc: locImg.gent,
-    imageAlt: "Opening en feestelijk moment Poule & Poulette Gent",
+    imageAlt: "Poule & Poulette Gent — Korenmarkt",
     detailIntro:
-      "Gent ademt al mee met openingen en recepties bij de keten. De vaste locatiepagina groeit mee met jullie officiële gegevens en reservatiemogelijkheden.",
+      "Net achter de Graslei, op de drukke Korenmarkt: de Gentse vestiging in het centrum. Telefoon en mail vind je op de locatiepagina van poulepoulette.com; reserveren kan via de site van de keten.",
+    openingHours: [
+      "Zo–do: 11:45–21:30",
+      "Vr–za: 11:45–22:00",
+    ],
   },
   {
     id: "leuven",
     city: "Leuven",
-    title: "Poule & Poulette Leuven",
-    addressLines: ["Adres en openingsuren worden op deze site geüpdatet."],
-    tel: "",
-    telHref: "",
-    mail: "",
-    mapsQuery: "Poule Poulette Leuven",
+    title: "Poule & Poulette — Tiensestraat",
+    addressLines: ["Tiensestraat 15", "3000 Leuven"],
+    tel: "+32 16 79 21 52",
+    telHref: "tel:+3216792152",
+    mail: "TS15@poulepoulette.com",
+    mapsQuery: "Poule Poulette Tiensestraat 15 Leuven",
     imageSrc: locImg.leuven,
-    imageAlt: "Poule & Poulette — sfeerbeeld Leuven",
+    imageAlt: "Poule & Poulette Leuven — vlak bij de Grote Markt",
     detailIntro:
-      "Studentenstad of niet: hier tellen dezelfde smaken en service. We werken de Leuvense vestigingspagina uit zodra adres en contact klaarstaan.",
+      "Midden in de Tiensestraat, op een steenworp van de Grote Markt: ideaal voor studenten, shoppers en wie na het werk wil neerploffen in de cosy zitboxen.",
+    openingHours: [
+      "Ma–do: 11:45–14:30 & 17:00–21:00",
+      "Vr–za: 11:45–22:00",
+      "Zo: 11:45–21:00",
+    ],
   },
   {
     id: "mechelen",
     city: "Mechelen",
-    title: "Poule & Poulette Mechelen",
+    title: "Poule & Poulette — IJzerenleen",
     addressLines: ["IJzerenleen 36", "2800 Mechelen"],
     tel: "+32 15 52 83 51",
     telHref: "tel:+3215528351",
     mail: "IL36@poulepoulette.com",
     mapsQuery: "Poule Poulette IJzerenleen 36 Mechelen",
     imageSrc: locImg.mechelen,
-    imageAlt: "Poule & Poulette Mechelen — terras en gevel",
+    imageAlt: "Poule & Poulette Mechelen — autoluwe IJzerenleen",
     detailIntro:
-      "Op de IJzerenleen draait alles om shared plates en een warme sfeer. Bel of mail voor reservaties en vragen — het team helpt je graag verder.",
+      "In het autoluwe hart van Mechelen: shared plates, volle terrasjes en het vertrouwde Poule & Poulette-geluid. Bel of mail voor reservaties.",
+    openingHours: [
+      "Ma–do: 11:45–14:00 & 16:45–21:00",
+      "Vr: 11:45–14:00 & 16:45–22:00",
+      "Za: 11:45–21:30",
+      "Zo: 11:45–21:00",
+    ],
   },
   {
     id: "oostende",
     city: "Oostende",
-    title: "Poule & Poulette Oostende",
-    addressLines: ["Adres en openingsuren worden op deze site geüpdatet."],
+    title: "Poule & Poulette — aan zee",
+    addressLines: ["Leopold II-laan 34", "8400 Oostende"],
     tel: "",
     telHref: "",
     mail: "",
-    mapsQuery: "Poule Poulette Oostende",
+    mapsQuery: "Poule Poulette Leopold II-laan 34 Oostende",
     imageSrc: locImg.oostende,
-    imageAlt: "Poule & Poulette — sfeerbeeld Oostende",
+    imageAlt: "Poule & Poulette Oostende — vlak bij het strand en casino",
     detailIntro:
-      "Zeezijde of centrum: de kust krijgt de Poule & Poulette-toets. Praktische info en openingsuren verschijnen hier zodra ze definitief zijn.",
+      "Pal in de buurt van het casino en op loopafstand van het strand: kipgerechten met een vleugje kust. Actuele openingsuren en contact staan op poulepoulette.com/locaties.",
   },
 ];
 
@@ -171,7 +205,7 @@ export const locationsMarqueePhrases = [
   "KIES JE STAD · ZELFDE MERK",
   "ANTWERPEN · BRUSSEL · BRUGGE · GENT · LEUVEN · MECHELEN · OOSTENDE",
   "GOOD CHICKEN · GOOD MOOD",
-  "LOKALE AANWEZIGHEID · ÉÉN VERZORGDE SITE",
+  "7/7 OPEN · FUN LOVING FOOD MOMENTS",
   "POULE & POULETTE",
 ] as const;
 
@@ -179,10 +213,17 @@ export const locationsMarqueePhrases = [
 export const locationsPageCopy = {
   kicker: "Poule & Poulette",
   title: "Virtuele locaties",
+  /** Vaste balk (overlay); kort. */
+  introBar:
+    "Tik een tegel voor route, contact en reserveren. Extra filialen (Etterbeek, Merode, Expo…) op de officiële site.",
   intro:
-    "Scroll om door alle vestigingen te bladeren. Tik op een locatie om het beeld groter te bekijken — straks met route en alle praktische gegevens per adres.",
-  scrollHint: "Scroll omlaag om verder te gaan · tik om te vergroten",
-  zoomClose: "Sluit vergroting",
+    "Elke stad hieronder heeft een tegel in het mozaïek. Voor de volledige lijst met alle adresjes, uren en reservatie: ga naar poulepoulette.com/locaties.",
+  splashTitle: "Alle locaties",
+  splashLine:
+    "Deze site toont de zeven vaste steden. Op poulepoulette.com vind je ook Etterbeek, Merode, Brussels Expo en actuele info per zaak.",
+  scrollHint:
+    "Tik op een tegel voor details · nummers scrollen naar die vestiging · pijltjestoetsen wisselen de focus",
+  zoomClose: "Sluit",
   footnote:
-    "Adressen en openingsuren worden per vestiging geüpdatet. Voor reserveren en actuele info: open de pagina van je dichtstbijzijnde restaurant.",
+    "Openingsuren en contact kunnen wijzigen. Controleer altijd poulepoulette.com/locaties voor de laatste info en reserveren.",
 } as const;

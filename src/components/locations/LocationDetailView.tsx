@@ -3,7 +3,10 @@
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import type { ChainLocation } from "@/content/locations";
+import {
+  officialLocationsUrl,
+  type ChainLocation,
+} from "@/content/locations";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -14,6 +17,7 @@ export function LocationDetailView({ location }: Props) {
   const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.mapsQuery)}`;
   const hasTel = Boolean(location.tel && location.telHref);
   const hasMail = Boolean(location.mail);
+  const hours = location.openingHours;
 
   return (
     <div className="flex min-h-dvh flex-col bg-pp-black text-pp-white">
@@ -102,6 +106,19 @@ export function LocationDetailView({ location }: Props) {
               </address>
             </div>
 
+            {hours && hours.length > 0 ? (
+              <div>
+                <h2 className="font-accent text-[0.65rem] tracking-[0.28em] text-pp-olive/70 uppercase">
+                  Openingsuren
+                </h2>
+                <ul className="font-accent mt-3 space-y-1 text-base leading-relaxed text-pp-black/80">
+                  {hours.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
             {(hasTel || hasMail) && (
               <div>
                 <h2 className="font-accent text-[0.65rem] tracking-[0.28em] text-pp-olive/70 uppercase">
@@ -128,6 +145,21 @@ export function LocationDetailView({ location }: Props) {
               </div>
             )}
 
+            {!hasTel && !hasMail ? (
+              <p className="font-accent text-sm text-pp-black/55">
+                Telefoon en e-mail voor deze vestiging: zie{" "}
+                <a
+                  href={officialLocationsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pp-olive underline decoration-pp-olive/35 underline-offset-2 transition-colors hover:text-pp-christmas"
+                >
+                  poulepoulette.com/locaties
+                </a>
+                .
+              </p>
+            ) : null}
+
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
               <a
                 href={mapsHref}
@@ -137,11 +169,19 @@ export function LocationDetailView({ location }: Props) {
               >
                 Open in Maps
               </a>
+              <a
+                href={officialLocationsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-olive/35 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:text-pp-lollypop"
+              >
+                Alle locaties (officieel)
+              </a>
               <Link
                 href="/locations"
                 className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-olive/35 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:text-pp-lollypop"
               >
-                Andere steden
+                Mozaïek
               </Link>
             </div>
           </div>

@@ -19,6 +19,7 @@ import {
   useState,
 } from "react";
 import type { RefObject } from "react";
+import { FixedPageIntroStrip } from "@/components/FixedPageIntroStrip";
 import {
   menuMarqueePhrases,
   menuPageCopy,
@@ -408,12 +409,18 @@ export function MenuVirtualExperience() {
         <MenuPageChrome />
         <MenuMarqueeBand />
         {showMenuNote ? (
-          <StickyMenuNote
+          <FixedPageIntroStrip
             labelId={labelId}
+            title={menuPageCopy.title}
+            introBar={menuPageCopy.introBar}
+            reduceMotion={reduceMotion}
             onDismiss={() => setShowMenuNote(false)}
+            dismissAriaLabel="Verberg menu-uitleg"
           />
         ) : null}
-        <div className="flex flex-col">
+        <div
+          className={`flex flex-col ${showMenuNote ? "pt-[3.25rem] sm:pt-12" : ""}`}
+        >
           {menuVirtualSections.map((section, i) => (
             <article
               key={section.src}
@@ -536,15 +543,18 @@ export function MenuVirtualExperience() {
             </div>
           </motion.div>
 
-          <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <div
+            className={`relative z-10 flex min-h-0 flex-1 flex-col ${showMenuNote ? "pt-[3.25rem] sm:pt-12" : ""}`}
+          >
             {showMenuNote ? (
-              <div className="shrink-0 px-3 pt-1.5 sm:px-4 md:px-5">
-                <StickyMenuNote
-                  labelId={labelId}
-                  compact
-                  onDismiss={() => setShowMenuNote(false)}
-                />
-              </div>
+              <FixedPageIntroStrip
+                labelId={labelId}
+                title={menuPageCopy.title}
+                introBar={menuPageCopy.introBar}
+                reduceMotion={reduceMotion}
+                onDismiss={() => setShowMenuNote(false)}
+                dismissAriaLabel="Verberg menu-uitleg"
+              />
             ) : null}
 
             <div className="shrink-0 px-4 pb-0 pt-1 sm:px-5 md:pt-1">
@@ -744,57 +754,6 @@ function MenuPageChrome() {
         </Link>
       </div>
     </header>
-  );
-}
-
-function StickyMenuNote({
-  labelId,
-  onDismiss,
-  compact = false,
-}: {
-  labelId: string;
-  onDismiss: () => void;
-  compact?: boolean;
-}) {
-  return (
-    <motion.aside
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.25, ease }}
-      className={`mx-auto flex w-full items-start justify-between gap-2 rounded-sm border border-pp-olive/10 bg-pp-white/88 backdrop-blur-sm ${
-        compact ? "max-w-3xl px-2.5 py-1.5" : "max-w-4xl px-4 py-3"
-      }`}
-    >
-      <div className="min-w-0">
-        <p className="font-accent text-[0.58rem] tracking-[0.28em] text-pp-olive/48 uppercase">
-          {menuPageCopy.kicker}
-        </p>
-        <p
-          id={labelId}
-          className={`font-display text-pp-olive ${
-            compact ? "mt-1 text-lg md:text-xl" : "mt-1 text-2xl md:text-3xl"
-          }`}
-        >
-          {menuPageCopy.title}
-        </p>
-        <p
-          className={`font-accent max-w-2xl leading-relaxed text-pp-black/68 ${
-            compact ? "mt-1 text-xs md:text-sm" : "mt-2 text-sm md:text-base"
-          }`}
-        >
-          {menuPageCopy.intro}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="font-accent shrink-0 rounded-sm border border-pp-olive/10 px-2.5 py-1.5 text-[0.58rem] tracking-[0.2em] text-pp-olive/58 uppercase transition-colors hover:border-pp-lollypop/40 hover:text-pp-lollypop"
-        aria-label="Verberg menu-uitleg"
-      >
-        Sluit
-      </button>
-    </motion.aside>
   );
 }
 
