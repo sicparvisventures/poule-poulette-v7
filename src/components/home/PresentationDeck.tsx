@@ -204,7 +204,7 @@ function PresentationDeckMobile({
                     src={slide.imageSrc}
                     alt=""
                     fill
-                    className="z-0 object-contain object-center"
+                    className={`z-0 object-center ${i >= 1 ? "object-cover" : "object-contain"}`}
                     sizes="100vw"
                     priority={i === 0}
                     unoptimized={deckImageUnoptimized(slide.imageSrc)}
@@ -316,8 +316,10 @@ function PresentationDeckDesktop({
           className="flex h-full w-max flex-row will-change-transform"
           style={{ x }}
         >
-          {deckSlides.map((slide, i) =>
-            slide.fullBleedImage ? (
+          {deckSlides.map((slide, i) => {
+            /** Rode naad na slide 2 (index 1) uit: vloeiende overgang naar slide 3. */
+            const showSeamAfter = i < slideCount - 1 && i !== 1;
+            return slide.fullBleedImage ? (
               <article
                 key={slide.id}
                 className="relative h-full w-screen shrink-0 overflow-visible bg-pp-black"
@@ -327,7 +329,7 @@ function PresentationDeckDesktop({
                   src={slide.imageSrc}
                   alt=""
                   fill
-                  className="z-0 object-contain object-center"
+                  className={`z-0 object-center ${i >= 1 ? "object-cover" : "object-contain"}`}
                   sizes="100vw"
                   priority={i === 0}
                   unoptimized={deckImageUnoptimized(slide.imageSrc)}
@@ -340,7 +342,7 @@ function PresentationDeckDesktop({
                     />
                   </div>
                 ) : null}
-                {i < slideCount - 1 ? <DeckSlideSeamSticker /> : null}
+                {showSeamAfter ? <DeckSlideSeamSticker /> : null}
               </article>
             ) : (
               <article
@@ -385,10 +387,10 @@ function PresentationDeckDesktop({
                     })()}
                   </div>
                 </div>
-                {i < slideCount - 1 ? <DeckSlideSeamSticker /> : null}
+                {showSeamAfter ? <DeckSlideSeamSticker /> : null}
               </article>
-            ),
-          )}
+            );
+          })}
         </motion.div>
 
         <div
