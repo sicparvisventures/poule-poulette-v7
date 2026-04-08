@@ -1,6 +1,6 @@
 /**
  * Presentatie-deck (Prezi / horizontale “slides”).
- * Placeholder-beelden in /public/placeholders/deck/ — later vervangen door .webp of foto’s.
+ * Beeld links: o.a. /public/placeholders/deck/; stickers onder /public/images/.
  */
 export type DeckSlide = {
   id: string;
@@ -9,15 +9,41 @@ export type DeckSlide = {
   kicker: string;
   title: string;
   body: string;
+  /** Optionele “sticker” op het tekstpaneel (PNG met transparantie). */
+  stickerSrc?: string;
+  /**
+   * Eén beeld over de volle breedte van de slide (geen split paneel + tekstkolom).
+   * Gebruik bij brede illustraties die over het hele scherm doorlopen.
+   */
+  fullBleedImage?: boolean;
+  /**
+   * Voettekst onder het body-blok.
+   * - `undefined`: standaard placeholder voor ontwerpers.
+   * - `false`: geen voettekst.
+   * - string: vaste copy.
+   */
+  assetFooter?: string | false;
 };
+
+const DEFAULT_DECK_ASSET_FOOTER =
+  "Placeholder beeld — vervang in /public/placeholders/deck/";
+
+export function deckSlideAssetFooter(slide: DeckSlide): string | null {
+  if (slide.assetFooter === false) return null;
+  if (typeof slide.assetFooter === "string") return slide.assetFooter;
+  return DEFAULT_DECK_ASSET_FOOTER;
+}
 
 export const deckSlides: DeckSlide[] = [
   {
     id: "slide-01",
-    imageSrc: "/placeholders/deck/slide-01.jpg",
-    kicker: "Hoofdstuk 01",
-    title: "Verhaal & sfeer",
-    body: "Placeholder-tekst. Vervang dit blok door echte copy wanneer de definitieve beelden klaar staan.",
+    imageSrc: "/images/slide1.svg",
+    fullBleedImage: true,
+    stickerSrc: "/images/kroonroze.png",
+    kicker: "",
+    title: "",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-02",

@@ -19,9 +19,69 @@ import {
   useRef,
   useState,
 } from "react";
-import { deckSlides } from "@/content/deckSlides";
+import {
+  deckSlideAssetFooter,
+  deckSlides,
+  type DeckSlide,
+} from "@/content/deckSlides";
 
 const MD = 768;
+
+function deckImageUnoptimized(src: string) {
+  return /\.svg$/i.test(src);
+}
+
+function DeckSlideBodyParagraphs({
+  slide,
+  variant,
+}: {
+  slide: DeckSlide;
+  variant: "mobile" | "desktop";
+}) {
+  const parts = slide.body.split(/\n\n+/).map((s) => s.trim()).filter(Boolean);
+  const base =
+    variant === "mobile"
+      ? "font-accent text-base leading-relaxed text-pp-creme/88"
+      : "font-accent text-base leading-relaxed text-pp-creme/88 max-w-lg";
+  return (
+    <>
+      {parts.map((part, idx) => (
+        <p
+          key={idx}
+          className={`${base} ${idx === 0 ? (variant === "mobile" ? "mt-4" : "mt-5") : "mt-4"}`}
+        >
+          {part}
+        </p>
+      ))}
+    </>
+  );
+}
+
+function DeckSlideSticker({
+  src,
+  variant,
+}: {
+  src: string;
+  variant: "mobile" | "desktop";
+}) {
+  const wrap =
+    variant === "mobile"
+      ? "pointer-events-none absolute -right-2 bottom-8 z-[1] w-[min(46vw,9.5rem)] rotate-[11deg] drop-shadow-[0_12px_28px_rgb(0_0_0/0.35)] sm:w-36"
+      : "pointer-events-none absolute -right-1 bottom-[14%] z-[1] w-[min(40vw,11rem)] rotate-[13deg] drop-shadow-[0_14px_36px_rgb(0_0_0/0.4)] md:bottom-[18%] md:-right-2 md:w-[min(36vw,12rem)]";
+  return (
+    <div className={wrap} aria-hidden>
+      <div className="relative aspect-square w-full">
+        <Image
+          src={src}
+          alt=""
+          fill
+          className="object-contain object-center"
+          sizes="(max-width: 768px) 40vw, 200px"
+        />
+      </div>
+    </div>
+  );
+}
 
 function useDesktopHorizontalDeck() {
   const [ok, setOk] = useState(false);
@@ -78,23 +138,15 @@ function PresentationDeckMobile({
           id={labelId}
           className="font-accent text-sm tracking-[0.25em] text-pp-olive/70 uppercase"
         >
-          Presentatie
+          Ontdek ons verhaal
         </p>
         <h2 className="font-display mt-3 text-3xl text-pp-olive md:text-4xl">
-          Slide per slide
+          Welkom in het kippenhok
         </h2>
         <p className="font-accent mt-3 max-w-2xl text-pp-black/70">
-          Op dit scherm scroll je verticaal door dezelfde slides. Op desktop
-          schuift het deck horizontaal mee met je scroll (zoals bij o.a.{" "}
-          <a
-            href="https://taqueriarico.com"
-            className="text-pp-christmas underline decoration-pp-christmas/40 underline-offset-4"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Taqueria Rico
-          </a>
-          ).
+          Scroll verder: op mobiel zie je elk hoofdstuk onder elkaar. Op desktop
+          schuift hetzelfde verhaal horizontaal mee terwijl je omlaag gaat —
+          fun loving food moments, paneel voor paneel.
         </p>
       </div>
       <ol className="flex flex-col gap-0">
@@ -103,29 +155,65 @@ function PresentationDeckMobile({
             key={slide.id}
             className="border-t border-pp-olive/10 first:border-t-0"
           >
-            <article className="grid gap-0 md:grid-cols-2">
-              <div className="relative aspect-4/3 w-full md:aspect-auto md:min-h-[min(70vh,520px)]">
-                <Image
-                  src={slide.imageSrc}
-                  alt=""
-                  fill
-                  className="object-cover object-center"
-                  sizes="100vw"
-                  priority={i === 0}
-                />
-              </div>
-              <div className="flex flex-col justify-center bg-pp-white px-6 py-12 md:px-12">
-                <p className="font-accent text-xs tracking-[0.3em] text-pp-olive/60 uppercase">
-                  {slide.kicker}
-                </p>
-                <h3 className="font-display mt-3 text-3xl text-pp-olive">
-                  {slide.title}
-                </h3>
-                <p className="font-accent mt-4 text-base leading-relaxed text-pp-black/75">
-                  {slide.body}
-                </p>
-              </div>
-            </article>
+            {slide.fullBleedImage ? (
+              <article aria-label={`Slide ${i + 1} van ${slideCount}`}>
+                <div className="relative aspect-16/10 w-full min-h-[min(52vh,480px)] overflow-visible bg-pp-black md:min-h-[min(70vh,560px)]">
+                  <Image
+                    src={slide.imageSrc}
+                    alt=""
+                    fill
+                    className="z-0 object-contain object-center"
+                    sizes="100vw"
+                    priority={i === 0}
+                    unoptimized={deckImageUnoptimized(slide.imageSrc)}
+                  />
+                  {slide.stickerSrc ? (
+                    <div className="pointer-events-none absolute inset-0 z-10">
+                      <DeckSlideSticker
+                        src={slide.stickerSrc}
+                        variant="mobile"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+            ) : (
+              <article className="grid gap-0 md:grid-cols-2">
+                <div className="relative aspect-4/3 w-full md:aspect-auto md:min-h-[min(70vh,520px)]">
+                  <Image
+                    src={slide.imageSrc}
+                    alt=""
+                    fill
+                    className="object-cover object-center"
+                    sizes="100vw"
+                    priority={i === 0}
+                    unoptimized={deckImageUnoptimized(slide.imageSrc)}
+                  />
+                </div>
+                <div className="relative flex flex-col justify-center overflow-visible bg-pp-olive px-6 py-12 md:px-12">
+                  {slide.stickerSrc ? (
+                    <DeckSlideSticker src={slide.stickerSrc} variant="mobile" />
+                  ) : null}
+                  <div className="relative z-10">
+                    <p className="font-accent text-xs tracking-[0.3em] text-pp-lollypop/90 uppercase">
+                      {slide.kicker}
+                    </p>
+                    <h3 className="font-display mt-3 text-3xl text-pp-creme">
+                      {slide.title}
+                    </h3>
+                    <DeckSlideBodyParagraphs slide={slide} variant="mobile" />
+                    {(() => {
+                      const foot = deckSlideAssetFooter(slide);
+                      return foot ? (
+                        <p className="font-accent mt-6 text-[0.65rem] tracking-[0.18em] text-pp-creme/40 uppercase">
+                          {foot}
+                        </p>
+                      ) : null;
+                    })()}
+                  </div>
+                </div>
+              </article>
+            )}
           </li>
         ))}
       </ol>
@@ -173,10 +261,10 @@ function PresentationDeckDesktop({
               id={labelId}
               className="font-accent text-[0.65rem] tracking-[0.35em] text-pp-creme/55 uppercase md:text-xs"
             >
-              Presentatie — scroll omlaag
+              Ontdek ons verhaal — scroll omlaag
             </p>
             <h2 className="font-display mt-2 max-w-md text-2xl text-pp-creme md:text-3xl">
-              Prezi-achtig deck
+              Welkom in het kippenhok
             </h2>
           </div>
           <DeckProgressIndicator progress={progressPct} count={slideCount} />
@@ -186,42 +274,77 @@ function PresentationDeckDesktop({
           className="flex h-full w-max flex-row will-change-transform"
           style={{ x }}
         >
-          {deckSlides.map((slide, i) => (
-            <article
-              key={slide.id}
-              className="relative flex h-full w-screen shrink-0 flex-col md:flex-row"
-              aria-label={`Slide ${i + 1} van ${slideCount}`}
-            >
-              <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
+          {deckSlides.map((slide, i) =>
+            slide.fullBleedImage ? (
+              <article
+                key={slide.id}
+                className="relative h-full w-screen shrink-0 overflow-visible bg-pp-black"
+                aria-label={`Slide ${i + 1} van ${slideCount}`}
+              >
                 <Image
                   src={slide.imageSrc}
                   alt=""
                   fill
-                  className="object-cover object-center"
-                  sizes="(min-width: 768px) 52vw, 100vw"
+                  className="z-0 object-contain object-center"
+                  sizes="100vw"
                   priority={i === 0}
+                  unoptimized={deckImageUnoptimized(slide.imageSrc)}
                 />
-                <div
-                  className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-black/50 to-transparent md:bg-linear-to-r md:from-transparent md:to-pp-black/25"
-                  aria-hidden
-                />
-              </div>
-              <div className="flex flex-1 flex-col justify-center bg-pp-black px-6 py-8 md:w-[48%] md:px-12 md:py-16 lg:px-20">
-                <p className="font-accent text-xs tracking-[0.32em] text-pp-lollypop/90 uppercase">
-                  {slide.kicker}
-                </p>
-                <h3 className="font-display mt-4 text-[clamp(1.85rem,4.2vw,3.25rem)] leading-tight text-pp-creme">
-                  {slide.title}
-                </h3>
-                <p className="font-accent mt-5 max-w-lg text-base leading-relaxed text-pp-white/78">
-                  {slide.body}
-                </p>
-                <p className="font-accent mt-8 text-[0.65rem] tracking-[0.2em] text-pp-creme/35 uppercase">
-                  Placeholder beeld — vervang in /public/placeholders/deck/
-                </p>
-              </div>
-            </article>
-          ))}
+                {slide.stickerSrc ? (
+                  <div className="pointer-events-none absolute inset-0 z-10">
+                    <DeckSlideSticker
+                      src={slide.stickerSrc}
+                      variant="desktop"
+                    />
+                  </div>
+                ) : null}
+              </article>
+            ) : (
+              <article
+                key={slide.id}
+                className="relative flex h-full w-screen shrink-0 flex-col md:flex-row"
+                aria-label={`Slide ${i + 1} van ${slideCount}`}
+              >
+                <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
+                  <Image
+                    src={slide.imageSrc}
+                    alt=""
+                    fill
+                    className="object-cover object-center"
+                    sizes="(min-width: 768px) 52vw, 100vw"
+                    priority={i === 0}
+                    unoptimized={deckImageUnoptimized(slide.imageSrc)}
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-black/50 to-transparent md:bg-linear-to-r md:from-transparent md:to-pp-olive/35"
+                    aria-hidden
+                  />
+                </div>
+                <div className="relative flex flex-1 flex-col justify-center overflow-visible bg-pp-olive px-6 py-8 md:w-[48%] md:px-12 md:py-16 lg:px-20">
+                  {slide.stickerSrc ? (
+                    <DeckSlideSticker src={slide.stickerSrc} variant="desktop" />
+                  ) : null}
+                  <div className="relative z-10">
+                    <p className="font-accent text-xs tracking-[0.32em] text-pp-lollypop/90 uppercase">
+                      {slide.kicker}
+                    </p>
+                    <h3 className="font-display mt-4 text-[clamp(1.85rem,4.2vw,3.25rem)] leading-tight text-pp-creme">
+                      {slide.title}
+                    </h3>
+                    <DeckSlideBodyParagraphs slide={slide} variant="desktop" />
+                    {(() => {
+                      const foot = deckSlideAssetFooter(slide);
+                      return foot ? (
+                        <p className="font-accent mt-8 text-[0.65rem] tracking-[0.2em] text-pp-creme/35 uppercase">
+                          {foot}
+                        </p>
+                      ) : null;
+                    })()}
+                  </div>
+                </div>
+              </article>
+            ),
+          )}
         </motion.div>
 
         <div
@@ -253,7 +376,7 @@ function DeckProgressIndicator({
   );
 
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-pp-creme/15 bg-pp-black/40 px-3 py-2 backdrop-blur-sm">
+    <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-pp-creme/20 bg-pp-olive/45 px-3 py-2 backdrop-blur-sm">
       <span className="sr-only">Voortgang door het deck</span>
       {Array.from({ length: count }, (_, i) => (
         <span
