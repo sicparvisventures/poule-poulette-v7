@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import {
-  AnimatePresence,
   motion,
   type MotionValue,
   useMotionValueEvent,
@@ -72,7 +71,7 @@ function DeckSlideSticker({
 }) {
   const wrap =
     variant === "mobile"
-      ? "pointer-events-none absolute -right-2 bottom-44 z-[1] w-[min(46vw,9.5rem)] rotate-[11deg] drop-shadow-[0_12px_28px_rgb(0_0_0/0.35)] sm:bottom-52 sm:w-36"
+      ? "pointer-events-none absolute right-2 bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] z-[2] w-[min(34vw,8rem)] rotate-[8deg] drop-shadow-[0_10px_24px_rgb(0_0_0/0.32)] sm:right-3 sm:w-[min(28vw,8.5rem)]"
       : "pointer-events-none absolute -right-1 bottom-[54%] z-[1] w-[min(40vw,11rem)] rotate-[13deg] drop-shadow-[0_14px_36px_rgb(0_0_0/0.4)] md:bottom-[60%] md:-right-2 md:w-[min(36vw,12rem)]";
   return (
     <div className={wrap} aria-hidden>
@@ -171,14 +170,32 @@ export function DeckDesktopSlideArticle({
     return (
       <article
         {...articleProps}
-        className="relative h-full w-screen shrink-0 overflow-visible bg-pp-black"
+        className="relative h-full w-[100dvw] shrink-0 overflow-visible bg-pp-black md:w-screen"
         aria-label={`Slide ${i + 1} van ${slideCount}`}
       >
         <Image
           src={slide.imageSrc}
           alt=""
           fill
-          className="z-0 object-cover object-center"
+          className="z-0 object-cover object-center opacity-40 blur-[12px] saturate-[0.9] md:hidden"
+          sizes="100vw"
+          priority={i === 0}
+          unoptimized={deckImageUnoptimized(slide.imageSrc)}
+        />
+        <Image
+          src={slide.imageSrc}
+          alt=""
+          fill
+          className="z-10 object-contain object-center md:hidden"
+          sizes="100vw"
+          priority={i === 0}
+          unoptimized={deckImageUnoptimized(slide.imageSrc)}
+        />
+        <Image
+          src={slide.imageSrc}
+          alt=""
+          fill
+          className="z-0 hidden object-cover object-center md:block"
           sizes="100vw"
           priority={i === 0}
           unoptimized={deckImageUnoptimized(slide.imageSrc)}
@@ -200,7 +217,7 @@ export function DeckDesktopSlideArticle({
   return (
     <article
       {...articleProps}
-      className="relative flex h-full w-screen shrink-0 flex-col overflow-visible md:flex-row"
+      className="relative flex h-full w-[100dvw] shrink-0 flex-col overflow-visible md:w-screen md:flex-row"
       aria-label={`Slide ${i + 1} van ${slideCount}`}
     >
       <div className="relative h-[45%] w-full md:h-full md:w-[52%]">
@@ -262,32 +279,15 @@ function PresentationDeckMobile({
 }: {
   sectionRef: RefObject<HTMLElement | null>;
 }) {
-  const labelId = useId();
   const slideCount = deckSlides.length;
 
   return (
     <section
       ref={sectionRef}
       className="bg-pp-white text-pp-black"
-      aria-labelledby={labelId}
+      aria-label="Presentatie slides"
       id="presentatie"
     >
-      <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-        <p
-          id={labelId}
-          className="font-accent text-sm tracking-[0.25em] text-pp-olive/70 uppercase"
-        >
-          Ontdek ons verhaal
-        </p>
-        <h2 className="font-display mt-3 text-3xl text-pp-olive md:text-4xl">
-          Welkom in het kippenhok
-        </h2>
-        <p className="font-accent mt-3 max-w-2xl text-pp-black/70">
-          Scroll verder: op mobiel zie je elk hoofdstuk onder elkaar. Op desktop
-          schuift hetzelfde verhaal horizontaal mee terwijl je omlaag gaat —
-          fun loving food moments, paneel voor paneel.
-        </p>
-      </div>
       <ol className="flex flex-col gap-0">
         {deckSlides.map((slide, i) => {
           const prev = i > 0 ? deckSlides[i - 1] : undefined;
@@ -297,6 +297,7 @@ function PresentationDeckMobile({
             i > 0 && !seamlessFullBleed
               ? "border-t border-pp-olive/10"
               : "";
+          const mobileSlideSrc = `/fotookes/${Math.min(i + 1, 7)}mobile.svg`;
           return (
           <li key={slide.id} className={liBorder}>
             {slide.fullBleedImage ? (
@@ -304,13 +305,22 @@ function PresentationDeckMobile({
                 aria-label={`Slide ${i + 1} van ${slideCount}`}
                 {...(slide.anchorId ? { id: slide.anchorId } : {})}
               >
-                <div className="relative aspect-16/10 w-full min-h-[min(52vh,480px)] overflow-visible bg-pp-black md:min-h-[min(70vh,560px)]">
+                <div className="relative h-[min(84dvh,760px)] w-full overflow-hidden bg-pp-black sm:h-[min(88dvh,820px)] md:min-h-[min(70vh,560px)]">
+                  <Image
+                    src={mobileSlideSrc}
+                    alt=""
+                    fill
+                    className="z-0 object-cover object-center md:hidden"
+                    sizes="(max-width: 767px) 100vw, 100vw"
+                    priority={i === 0}
+                    unoptimized
+                  />
                   <Image
                     src={slide.imageSrc}
                     alt=""
                     fill
-                    className="z-0 object-cover object-center"
-                    sizes="100vw"
+                    className="z-0 hidden object-cover object-center md:block"
+                    sizes="(max-width: 767px) 100vw, 100vw"
                     priority={i === 0}
                     unoptimized={deckImageUnoptimized(slide.imageSrc)}
                   />
@@ -331,11 +341,20 @@ function PresentationDeckMobile({
               <article className="grid gap-0 md:grid-cols-2">
                 <div className="relative aspect-4/3 w-full md:aspect-auto md:min-h-[min(70vh,520px)]">
                   <Image
+                    src={mobileSlideSrc}
+                    alt=""
+                    fill
+                    className="object-cover object-center md:hidden"
+                    sizes="(max-width: 767px) 100vw, 100vw"
+                    priority={i === 0}
+                    unoptimized
+                  />
+                  <Image
                     src={slide.imageSrc}
                     alt=""
                     fill
-                    className="object-cover object-center"
-                    sizes="100vw"
+                    className="hidden object-cover object-center md:block"
+                    sizes="(max-width: 767px) 100vw, 100vw"
                     priority={i === 0}
                     unoptimized={deckImageUnoptimized(slide.imageSrc)}
                   />

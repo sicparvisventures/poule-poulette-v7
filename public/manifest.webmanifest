@@ -1,0 +1,17 @@
+{
+  "name": "Poule & Poulette",
+  "short_name": "Poule & Poulette",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1c3834",
+  "theme_color": "#1c3834",
+  "description": "Poule & Poulette — restaurants in Belgie. Fun loving food moments.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

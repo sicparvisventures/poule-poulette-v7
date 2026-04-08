@@ -1,6 +1,4 @@
 "use client";
-
-import Link from "next/link";
 import {
   AnimatePresence,
   LayoutGroup,
@@ -15,6 +13,7 @@ import { HomeHeroPrimary } from "@/components/home/HomeHeroPrimary";
 import { PresentationDeck } from "@/components/home/PresentationDeck";
 import { SplashPolaroidCollage } from "@/components/home/SplashPolaroidCollage";
 import { Reserve4YouWidget } from "@/components/reserve/Reserve4YouWidget";
+import { useViewportWidth } from "@/hooks/useViewportWidth";
 
 const STORAGE_KEY = "ppsite-splash-dismissed";
 const WORDMARK_LAYOUT_ID = "pp-wordmark-title";
@@ -104,21 +103,23 @@ function SplashSlideshow({ onComplete }: SlideshowProps) {
 
 export function HomeExperience() {
   const reduceMotion = useReducedMotion();
+  const vw = useViewportWidth(0);
   const splashTitleId = useId();
   const homeJourneyLabelId = useId();
   const mainRef = useRef<HTMLElement>(null);
-  const [desktopHorizontalJourney, setDesktopHorizontalJourney] =
-    useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const sync = () => setDesktopHorizontalJourney(mq.matches && !reduceMotion);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, [reduceMotion]);
+  const desktopHorizontalJourney = !reduceMotion && vw >= 768;
   const chickenDismissRef = useRef<number | null>(null);
-  const [splashActive, setSplashActive] = useState(true);
+  const [splashActive, setSplashActive] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    try {
+      return !reduceMotion && sessionStorage.getItem(STORAGE_KEY) !== "1";
+    } catch {
+      return !reduceMotion;
+    }
+  });
+  const splashOpen = splashActive && !reduceMotion;
   const [chickenMoment, setChickenMoment] = useState(false);
   const [chickenSpot, setChickenSpot] = useState<{
     bottom: number;
@@ -135,50 +136,38 @@ export function HomeExperience() {
   }, []);
 
   useEffect(() => {
+    if (!reduceMotion) return;
     try {
-      if (sessionStorage.getItem(STORAGE_KEY) === "1") {
-        setSplashActive(false);
-      }
+      sessionStorage.setItem(STORAGE_KEY, "1");
     } catch {
       /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      try {
-        sessionStorage.setItem(STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-      setSplashActive(false);
     }
   }, [reduceMotion]);
 
   useEffect(() => {
-    if (splashActive) {
+    if (splashOpen) {
       document.documentElement.classList.add("pp-splash-open");
     } else {
       document.documentElement.classList.remove("pp-splash-open");
     }
-  }, [splashActive]);
+  }, [splashOpen]);
 
   useEffect(() => {
-    if (splashActive) return;
+    if (splashOpen) return;
     const t = window.setTimeout(() => {
       mainRef.current?.focus({ preventScroll: true });
     }, 100);
     return () => window.clearTimeout(t);
-  }, [splashActive]);
+  }, [splashOpen]);
 
   useEffect(() => {
-    if (!splashActive) return;
+    if (!splashOpen) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") dismissSplash();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [splashActive, dismissSplash]);
+  }, [splashOpen, dismissSplash]);
 
   const onSlideshowFinished = useCallback(() => {
     try {
@@ -224,7 +213,7 @@ export function HomeExperience() {
         </a>
 
         <AnimatePresence>
-          {splashActive && (
+          {splashOpen && (
             <motion.div
               key="splash-chrome"
               initial={{ opacity: 1 }}
@@ -236,7 +225,7 @@ export function HomeExperience() {
           )}
         </AnimatePresence>
 
-        {splashActive ? (
+        {splashOpen ? (
           <div
             role="dialog"
             aria-modal="true"
@@ -293,18 +282,18 @@ export function HomeExperience() {
         ) : null}
 
         <div
-          inert={splashActive ? true : undefined}
+          inert={splashOpen ? true : undefined}
           className="flex min-h-full flex-1 flex-col"
         >
           <main
             ref={mainRef}
             id="content"
-            className={`relative flex flex-col outline-none ${splashActive ? "min-h-full flex-1" : ""} ${!splashActive && !desktopHorizontalJourney ? "pb-24 md:pb-28" : ""}`}
+            className={`relative flex flex-col outline-none ${splashOpen ? "min-h-full flex-1" : ""} ${!splashOpen && !desktopHorizontalJourney ? "pb-24 md:pb-28" : ""}`}
             tabIndex={-1}
           >
-            {(splashActive || !desktopHorizontalJourney) ? (
+            {(splashOpen || !desktopHorizontalJourney) ? (
               <HomeHeroPrimary
-                splashActive={splashActive}
+                splashActive={splashOpen}
                 splashTitleId={splashTitleId}
                 reduceMotion={reduceMotion}
                 wordmarkClass={wordmarkClass}
@@ -318,7 +307,7 @@ export function HomeExperience() {
               />
             ) : null}
 
-            {!splashActive && desktopHorizontalJourney ? (
+            {!splashOpen && desktopHorizontalJourney ? (
               <>
                 <DeckFloatingActions
                   visible
@@ -328,7 +317,7 @@ export function HomeExperience() {
                   journeyLabelId={homeJourneyLabelId}
                   hero={
                     <HomeHeroPrimary
-                      splashActive={splashActive}
+                      splashActive={splashOpen}
                       splashTitleId={splashTitleId}
                       reduceMotion={reduceMotion}
                       wordmarkClass={wordmarkClass}
@@ -344,34 +333,17 @@ export function HomeExperience() {
                   }
                 />
               </>
-            ) : !splashActive ? (
+            ) : !splashOpen ? (
               <>
                 <DeckFloatingActions
                   visible
                   instant={!!reduceMotion}
                 />
                 <div className="flex flex-col">
-                  <HeroDeckBlendBand />
+                  <div className="md:hidden">
+                    <HeroDeckBlendBand />
+                  </div>
                   <PresentationDeck />
-                  <section
-                    id="jobs"
-                    tabIndex={-1}
-                    className="scroll-mt-28 border-t border-pp-olive/10 bg-pp-white px-6 py-10 text-pp-olive md:py-12"
-                    aria-labelledby="pp-jobs-heading"
-                  >
-                    <span className="sr-only">
-                      Doel van de zwevende knop Jobs op dit scherm.
-                    </span>
-                    <h2
-                      id="pp-jobs-heading"
-                      className="font-display text-xl md:text-2xl"
-                    >
-                      Vacatures
-                    </h2>
-                    <p className="font-accent mt-2 max-w-lg text-sm text-pp-black/55">
-                      Inhoud volgt.
-                    </p>
-                  </section>
                   <section
                     id="reserve"
                     tabIndex={-1}

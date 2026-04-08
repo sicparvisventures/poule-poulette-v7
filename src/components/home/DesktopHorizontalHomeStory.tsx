@@ -58,7 +58,7 @@ export function DesktopHorizontalHomeStory({
   return (
     <section
       ref={containerRef}
-      className="hidden bg-pp-olive md:block"
+      className="block bg-pp-olive"
       style={{ height: `${(panelCount - 1) * 100}vh` }}
       aria-labelledby={journeyLabelId}
     >
@@ -79,11 +79,13 @@ export function DesktopHorizontalHomeStory({
           className="flex h-full w-max flex-row will-change-transform"
           style={{ x }}
         >
-          <div className="flex h-full w-screen shrink-0 flex-row overflow-hidden bg-pp-olive">
+          <div className="flex h-full w-[100dvw] shrink-0 flex-row overflow-hidden bg-pp-olive md:w-screen">
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [scrollbar-gutter:stable]">
               {hero}
             </div>
-            <HeroDeckBlendBand fadeTo="olive" layout="rail-right" />
+            <div className="hidden md:block">
+              <HeroDeckBlendBand fadeTo="olive" layout="rail-right" />
+            </div>
           </div>
           {deckSlides.map((slide, i) => (
             <DeckDesktopSlideArticle
