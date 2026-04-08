@@ -175,7 +175,7 @@ export function GroepenExperience() {
             </p>
           </motion.div>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+          <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:mt-12 md:grid-cols-3 md:gap-8">
             {groupMenuTiers.map((tier, i) => (
               <motion.button
                 key={tier.id}
@@ -190,44 +190,50 @@ export function GroepenExperience() {
                 whileHover={
                   reduceMotion
                     ? undefined
-                    : { y: -6, transition: { duration: 0.22, ease } }
+                    : { y: -4, transition: { duration: 0.22, ease } }
                 }
                 whileTap={
-                  reduceMotion ? undefined : { scale: 0.98, y: -2 }
+                  reduceMotion ? undefined : { scale: 0.99 }
                 }
                 onClick={() => setZoomIndex(i)}
-                className={`group relative flex w-full flex-col overflow-hidden rounded-[0.65rem] border-2 text-left shadow-lg outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-pp-lollypop focus-visible:ring-offset-2 focus-visible:ring-offset-pp-white ${tier.cardClass}`}
+                className={`group flex h-full w-full flex-col overflow-hidden rounded-[0.35rem] border text-left shadow-[0_12px_36px_rgb(28_56_52/0.08)] outline-none ring-pp-lollypop transition-[box-shadow,transform] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pp-white md:min-h-0 ${tier.cardClass}`}
                 aria-label={`${tier.label} — ${tier.tagline}, vergroten`}
               >
-                <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full ${tier.accentDot} ring-2 ring-pp-white/90 shadow-sm`}
-                    aria-hidden
-                  />
-                  <span className="rounded-sm bg-pp-olive/88 px-2 py-0.5 font-accent text-[0.55rem] tracking-[0.22em] text-pp-creme uppercase">
-                    {tier.label}
+                <div className="flex items-center justify-between gap-2 border-b border-pp-olive/10 bg-pp-white/60 px-3 py-2.5 sm:px-4">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${tier.accentDot} ring-2 ring-pp-white/90 shadow-sm`}
+                      aria-hidden
+                    />
+                    <span className="font-display text-lg text-pp-olive sm:text-xl">
+                      {tier.label}
+                    </span>
+                  </div>
+                  <span className="shrink-0 rounded-sm bg-pp-olive/10 px-2 py-0.5 font-accent text-[0.5rem] tracking-[0.2em] text-pp-olive/70 uppercase">
+                    {i + 1}/3
                   </span>
                 </div>
-                <div className="relative aspect-[3/4] w-full overflow-hidden border-b border-pp-olive/8 bg-pp-white/50">
-                  <Image
-                    src={tier.src}
-                    alt={tier.alt}
-                    fill
-                    className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
-                    priority={i === 0}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-olive/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative min-h-0 w-full flex-1 bg-[#f8f2dd]">
+                  <div className="relative mx-auto aspect-210/297 w-full max-w-[min(100%,280px)] sm:max-w-none">
+                    <Image
+                      src={tier.src}
+                      alt=""
+                      fill
+                      className="object-contain object-center p-1 transition-transform duration-300 ease-out group-hover:scale-[1.02] sm:p-1.5"
+                      sizes="(max-width: 768px) 90vw, 320px"
+                      priority={i < 2}
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-1 flex-col gap-2 px-4 py-4">
-                  <p className="font-accent text-[0.58rem] tracking-[0.26em] text-pp-olive/45 uppercase">
+                <div className="flex flex-col gap-1.5 border-t border-pp-olive/8 bg-pp-white/70 px-3 py-3 sm:px-4 sm:py-3.5">
+                  <p className="font-accent text-[0.58rem] tracking-[0.24em] text-pp-olive/50 uppercase">
                     {tier.tagline}
                   </p>
-                  <p className="font-accent text-sm leading-relaxed text-pp-black/75">
+                  <p className="font-accent text-sm leading-relaxed text-pp-black/72">
                     {tier.blurb}
                   </p>
-                  <p className="mt-auto pt-2 font-accent text-[0.58rem] tracking-[0.2em] text-pp-lollypop/90 uppercase">
-                    Tik om te vergroten →
+                  <p className="pt-1 font-accent text-[0.55rem] tracking-[0.18em] text-pp-lollypop/85 uppercase">
+                    Tik om te vergroten
                   </p>
                 </div>
               </motion.button>
@@ -310,7 +316,7 @@ function GroupMenuZoomModal({
                 type="button"
                 onClick={onPrev}
                 disabled={zoomIndex === 0}
-                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
               >
                 ← Vorige
               </button>
@@ -318,7 +324,7 @@ function GroupMenuZoomModal({
                 type="button"
                 onClick={onNext}
                 disabled={zoomIndex === count - 1}
-                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
               >
                 Volgende →
               </button>
@@ -327,13 +333,13 @@ function GroupMenuZoomModal({
               ref={closeBtnRef}
               type="button"
               onClick={onClose}
-              className="font-accent rounded-sm px-4 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase transition-colors hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+              className="font-accent rounded-sm px-4 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
             >
-              Sluiten (Esc)
+              {groupsPageCopy.zoomClose} (Esc)
             </button>
           </div>
           <div
-            className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-4 pb-8 pt-2 md:px-10"
+            className="flex min-h-0 flex-1 items-center justify-center px-4 pb-10 pt-2 md:px-10"
             onClick={(e) => e.stopPropagation()}
           >
             <p id={zoomTitleId} className="sr-only">
@@ -344,24 +350,25 @@ function GroupMenuZoomModal({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
               transition={{ duration: 0.25, ease }}
-              className="relative w-full max-w-4xl"
+              className="relative max-h-[min(92dvh,920px)] w-full max-w-6xl"
             >
-              <div className="relative overflow-hidden rounded-sm border border-pp-white/15 shadow-[0_28px_80px_rgb(0_0_0/0.5)]">
-                <Image
-                  src={tier.src}
-                  alt={tier.alt}
-                  width={1200}
-                  height={1600}
-                  className="h-auto w-full object-contain object-center"
-                  sizes="(max-width: 768px) 100vw, 900px"
-                  priority
-                />
-              </div>
-              <p className="mt-4 text-center font-display text-xl text-pp-creme">
-                {tier.label} — {tier.tagline}
-              </p>
+              <Image
+                src={tier.src}
+                alt={tier.alt}
+                width={1400}
+                height={1800}
+                className="mx-auto h-auto max-h-[min(92dvh,920px)] w-auto max-w-full object-contain object-center drop-shadow-[0_24px_64px_rgb(0_0_0/0.5)]"
+                sizes="100vw"
+                priority
+              />
             </motion.div>
           </div>
+          <p
+            className="pointer-events-none pb-6 text-center font-accent text-[0.65rem] tracking-[0.2em] text-pp-creme/50 uppercase"
+            aria-hidden
+          >
+            Gebruik ook ← en → om tussen menu&apos;s te wisselen
+          </p>
         </motion.div>
       ) : null}
     </AnimatePresence>
