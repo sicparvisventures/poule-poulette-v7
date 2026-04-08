@@ -1,14 +1,11 @@
 /**
  * Keten-brede locaties — bron voor /locations en gerelateerde UI.
- * Beelden onder /public/locations/. Adressen en uren afgestemd op poulepoulette.com/locaties (2026).
+ * Beelden onder /public/locations/. Adressen en uren afgestemd op de huidige merkinfo (2026).
  */
 
 export const brandTagline = "Fun loving food moments" as const;
 
-/** Officiële overzichtspagina — o.a. Etterbeek, Merode, Brussels Expo. */
-export const officialLocationsUrl = "https://poulepoulette.com/locaties/" as const;
-
-/** Korte opsomming voor meta / splash; sluit aan bij poulepoulette.com/locaties. */
+/** Korte opsomming voor meta / splash. */
 export const brandCitiesLine =
   "Antwerpen Eilandje · Brussel · Etterbeek · Gent · Leuven · Mechelen · Oostende · Merode · Brugge · Brussels Expo" as const;
 
@@ -35,13 +32,13 @@ export type ChainLocation = {
   imageAlt: string;
   /** Introductie op /locations/[slug] en in de zoom-pop-up. */
   detailIntro: string;
-  /** Optioneel: openingsurenregels zoals op de officiële site. */
+  /** Optioneel: openingsurenregels zoals in de actuele merkinfo. */
   openingHours?: readonly string[];
   videoSrc?: string | null;
 };
 
 /**
- * Vaste volgorde voor het mozaïek (7 steden). Zie ook officialLocationsUrl voor extra filialen.
+ * Vaste volgorde voor het mozaïek (7 steden).
  */
 export const chainLocations: ChainLocation[] = [
   {
@@ -71,7 +68,7 @@ export const chainLocations: ChainLocation[] = [
     addressLines: [
       "Sint-Katelijneplein 2",
       "1000 Brussel",
-      "Tip: ook Etterbeek (Place Jourdan), Merode en Brussels Expo — zie officiële locatiespagina.",
+      "Ook in Brussel: Etterbeek, Merode en Brussels Expo tijdens grote events.",
     ],
     tel: "",
     telHref: "",
@@ -80,7 +77,7 @@ export const chainLocations: ChainLocation[] = [
     imageSrc: locImg.brussel,
     imageAlt: "Poule & Poulette Brussel — Sint-Katelijneplein",
     detailIntro:
-      "Centraal op het levendige Sint-Katelijneplein. Het merk heeft ook een vestiging op Place Jourdan (Etterbeek), aan Merode en een stand op Brussels Expo tijdens grote beurzen — alle praktische info en reserveren via poulepoulette.com/locaties.",
+      "Centraal op het levendige Sint-Katelijneplein. Deze vestiging brengt dezelfde volle Poule & Poulette-sfeer als de rest van de keten, met Brusselse energie, lange tafels en chicken classics in het hart van de stad.",
     openingHours: [
       "Ma–vr: 11:45–14:30 & 17:30–21:30",
       "Za: 11:30–22:00",
@@ -118,7 +115,7 @@ export const chainLocations: ChainLocation[] = [
     imageSrc: locImg.gent,
     imageAlt: "Poule & Poulette Gent — Korenmarkt",
     detailIntro:
-      "Net achter de Graslei, op de drukke Korenmarkt: de Gentse vestiging in het centrum. Telefoon en mail vind je op de locatiepagina van poulepoulette.com; reserveren kan via de site van de keten.",
+      "Net achter de Graslei, op de drukke Korenmarkt: de Gentse vestiging in het centrum. Een levendige stop voor lunch, diner en spontane avonden in echte Poule & Poulette-sfeer.",
     openingHours: [
       "Zo–do: 11:45–21:30",
       "Vr–za: 11:45–22:00",
@@ -175,7 +172,7 @@ export const chainLocations: ChainLocation[] = [
     imageSrc: locImg.oostende,
     imageAlt: "Poule & Poulette Oostende — vlak bij het strand en casino",
     detailIntro:
-      "Pal in de buurt van het casino en op loopafstand van het strand: kipgerechten met een vleugje kust. Actuele openingsuren en contact staan op poulepoulette.com/locaties.",
+      "Pal in de buurt van het casino en op loopafstand van het strand: kipgerechten met een vleugje kust, ideaal voor een lunch na de dijk of een lange avond aan zee.",
   },
 ];
 
@@ -215,15 +212,15 @@ export const locationsPageCopy = {
   title: "Virtuele locaties",
   /** Vaste balk (overlay); kort. */
   introBar:
-    "Tik een tegel voor route, contact en reserveren. Extra filialen (Etterbeek, Merode, Expo…) op de officiële site.",
+    "Kies je stad, open de details en plan je volgende tafel in een paar tikken.",
   intro:
-    "Elke stad hieronder heeft een tegel in het mozaïek. Voor de volledige lijst met alle adresjes, uren en reservatie: ga naar poulepoulette.com/locaties.",
-  splashTitle: "Alle locaties",
+    "Elke stad hieronder heeft een eigen tegel, sfeerbeeld en detailpagina. Dit is de plek waar de locaties samenkomen in één strakke merkervaring.",
+  splashTitle: "Onze steden",
   splashLine:
-    "Deze site toont de zeven vaste steden. Op poulepoulette.com vind je ook Etterbeek, Merode, Brussels Expo en actuele info per zaak.",
+    "Van het Eilandje tot Oostende: ontdek de vaste Poule & Poulette-steden, telkens met hun eigen ritme, adres en sfeer.",
   scrollHint:
-    "Tik op een tegel voor details · nummers scrollen naar die vestiging · pijltjestoetsen wisselen de focus",
-  zoomClose: "Sluit",
+    "Tik op een tegel voor details · gebruik de stadschips of pijltjestoetsen om te wisselen",
+  zoomClose: "Sluiten",
   footnote:
-    "Openingsuren en contact kunnen wijzigen. Controleer altijd poulepoulette.com/locaties voor de laatste info en reserveren.",
+    "Openingsuren en contactinfo blijven per vestiging afgestemd op de lokale flow. Reserveer bij voorkeur op tijd voor drukke momenten.",
 } as const;

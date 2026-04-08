@@ -271,6 +271,24 @@ export function MenuVirtualExperience() {
   const activeSpread = isDesktop
     ? DESKTOP_MENU_SPREADS[Math.min(index, DESKTOP_MENU_SPREADS.length - 1)]
     : null;
+  const navCount = isDesktop ? DESKTOP_MENU_SPREADS.length : count;
+  const currentNavIndex = isDesktop ? index : Math.min(index, count - 1);
+  const currentNavLabel = isDesktop
+    ? (() => {
+        if (!activeSpread) return "";
+        const leftLabel =
+          typeof activeSpread.left === "number"
+            ? menuVirtualSections[activeSpread.left]?.label
+            : activeSpread.left === "brand-cover"
+              ? "Cover"
+              : "Reserveer";
+        const rightLabel =
+          typeof activeSpread.right === "number"
+            ? menuVirtualSections[activeSpread.right]?.label
+            : "Back cover";
+        return `${leftLabel} / ${rightLabel}`;
+      })()
+    : menuVirtualSections[currentNavIndex]?.label ?? "";
 
   const { scrollYProgress } = useScroll({
     target: scrollRootRef,
@@ -350,6 +368,22 @@ export function MenuVirtualExperience() {
       current === null ? 0 : Math.min(count - 1, current + 1),
     );
   }, [count]);
+
+  const goPrevSection = useCallback(() => {
+    if (currentNavIndex <= 0) return;
+    const target = isDesktop
+      ? DESKTOP_MENU_SPREADS[currentNavIndex - 1]?.active[0] ?? 0
+      : currentNavIndex - 1;
+    scrollToSection(target);
+  }, [currentNavIndex, isDesktop, scrollToSection]);
+
+  const goNextSection = useCallback(() => {
+    if (currentNavIndex >= navCount - 1) return;
+    const target = isDesktop
+      ? DESKTOP_MENU_SPREADS[currentNavIndex + 1]?.active[0] ?? count - 1
+      : currentNavIndex + 1;
+    scrollToSection(target);
+  }, [count, currentNavIndex, isDesktop, navCount, scrollToSection]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -679,39 +713,37 @@ export function MenuVirtualExperience() {
                 <p className="font-accent text-center text-[0.62rem] tracking-[0.2em] text-pp-olive/45 uppercase">
                   {menuPageCopy.scrollHint}
                 </p>
-                <nav
-                  className="flex flex-wrap justify-center gap-2"
+                <div
+                  className="flex w-full max-w-xl items-center justify-between gap-3"
                   aria-label="Secties van het menu"
                 >
-                  {menuVirtualSections.map((s, i) => (
-                    <button
-                      key={s.src}
-                      type="button"
-                      onClick={() => scrollToSection(i)}
-                      className={`font-accent flex h-8 w-8 items-center justify-center rounded-full border text-[0.7rem] leading-none transition-colors ${
-                        isDesktop
-                          ? !!activeSpread?.active.includes(i)
-                            ? "border-pp-christmas/40 bg-pp-christmas/10 text-pp-christmas"
-                            : "border-pp-olive/12 text-pp-olive/50 hover:border-pp-olive/25 hover:text-pp-olive"
-                          : i === index
-                          ? "border-pp-christmas/40 bg-pp-christmas/10 text-pp-christmas"
-                          : "border-pp-olive/12 text-pp-olive/50 hover:border-pp-olive/25 hover:text-pp-olive"
-                      }`}
-                      aria-current={
-                        isDesktop
-                          ? activeSpread?.active.includes(i)
-                            ? "true"
-                            : undefined
-                          : i === index
-                            ? "true"
-                            : undefined
-                      }
-                      aria-label={`Ga naar pagina ${i + 1}`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                </nav>
+                  <button
+                    type="button"
+                    onClick={goPrevSection}
+                    disabled={currentNavIndex === 0}
+                    className="font-accent inline-flex min-w-24 items-center justify-center rounded-full border border-pp-olive/15 bg-pp-white/80 px-4 py-2 text-[0.68rem] tracking-[0.18em] text-pp-olive uppercase transition-colors hover:border-pp-olive/30 hover:text-pp-christmas disabled:cursor-not-allowed disabled:border-pp-olive/10 disabled:text-pp-olive/30"
+                    aria-label="Ga naar de vorige pagina"
+                  >
+                    ← Vorige
+                  </button>
+                  <div className="min-w-0 text-center">
+                    <p className="font-accent text-[0.58rem] tracking-[0.22em] text-pp-olive/42 uppercase">
+                      {isDesktop ? `Spread ${currentNavIndex + 1} van ${navCount}` : `Pagina ${currentNavIndex + 1} van ${navCount}`}
+                    </p>
+                    <p className="font-display mt-1 truncate text-base text-pp-olive sm:text-lg">
+                      {currentNavLabel}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={goNextSection}
+                    disabled={currentNavIndex === navCount - 1}
+                    className="font-accent inline-flex min-w-24 items-center justify-center rounded-full border border-pp-olive/15 bg-pp-white/80 px-4 py-2 text-[0.68rem] tracking-[0.18em] text-pp-olive uppercase transition-colors hover:border-pp-olive/30 hover:text-pp-christmas disabled:cursor-not-allowed disabled:border-pp-olive/10 disabled:text-pp-olive/30"
+                    aria-label="Ga naar de volgende pagina"
+                  >
+                    Volgende →
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -801,13 +833,16 @@ function ZoomModal({
           className="fixed inset-0 z-200 flex flex-col bg-pp-black/88 backdrop-blur-sm"
           onClick={onClose}
         >
-          <div className="flex shrink-0 items-center justify-between px-4 py-4 md:px-8">
+          <div
+            className="flex shrink-0 items-center justify-between px-4 py-4 md:px-8"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onPrev}
                 disabled={zoomIndex === 0}
-                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+                className="font-accent rounded-full border border-pp-creme/14 bg-pp-creme/8 px-4 py-2.5 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:border-pp-lollypop/45 hover:text-pp-lollypop disabled:cursor-not-allowed disabled:border-pp-creme/8 disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
               >
                 ← Vorige
               </button>
@@ -815,7 +850,7 @@ function ZoomModal({
                 type="button"
                 onClick={onNext}
                 disabled={zoomIndex === count - 1}
-                className="font-accent rounded-sm px-3 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop disabled:cursor-not-allowed disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+                className="font-accent rounded-full border border-pp-creme/14 bg-pp-creme/8 px-4 py-2.5 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:border-pp-lollypop/45 hover:text-pp-lollypop disabled:cursor-not-allowed disabled:border-pp-creme/8 disabled:text-pp-creme/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
               >
                 Volgende →
               </button>
@@ -824,7 +859,7 @@ function ZoomModal({
               ref={closeBtnRef}
               type="button"
               onClick={onClose}
-              className="font-accent rounded-sm px-4 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
+              className="font-accent rounded-full border border-pp-creme/14 bg-pp-creme/8 px-4 py-2.5 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:border-pp-lollypop/45 hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
             >
               {menuPageCopy.zoomClose} (Esc)
             </button>

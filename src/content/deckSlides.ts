@@ -1,6 +1,6 @@
 /**
  * Presentatie-deck (Prezi / horizontale “slides”).
- * Placeholder-beelden in /public/placeholders/deck/ — later vervangen door .webp of foto’s.
+ * Beeld links: o.a. /public/placeholders/deck/; stickers onder /public/images/.
  */
 export type DeckSlide = {
   id: string;
@@ -9,35 +9,100 @@ export type DeckSlide = {
   kicker: string;
   title: string;
   body: string;
+  /** Optionele “sticker” op het tekstpaneel (PNG met transparantie). */
+  stickerSrc?: string;
+  /**
+   * Eén beeld over de volle breedte van de slide (geen split paneel + tekstkolom).
+   * Gebruik bij brede illustraties die over het hele scherm doorlopen.
+   */
+  fullBleedImage?: boolean;
+  /** Polaroid-collage links (zelfde beelden als splash), o.a. slide 3. */
+  deckPolaroidsLeft?: boolean;
+  /** Desktop: polaroids rechts op dit paneel (slide 2 i.v.m. naad naar slide 3). */
+  deckPolaroidsRightCluster?: boolean;
+  /** Optioneel HTML-id op het paneel (ankers, o.a. #groepen / #vacatures). */
+  anchorId?: string;
+  /**
+   * Voettekst onder het body-blok.
+   * - `undefined`: standaard placeholder voor ontwerpers.
+   * - `false`: geen voettekst.
+   * - string: vaste copy.
+   */
+  assetFooter?: string | false;
 };
+
+const DEFAULT_DECK_ASSET_FOOTER =
+  "Placeholder beeld — vervang in /public/placeholders/deck/";
+
+export function deckSlideAssetFooter(slide: DeckSlide): string | null {
+  if (slide.assetFooter === false) return null;
+  if (typeof slide.assetFooter === "string") return slide.assetFooter;
+  return DEFAULT_DECK_ASSET_FOOTER;
+}
 
 export const deckSlides: DeckSlide[] = [
   {
     id: "slide-01",
-    imageSrc: "/placeholders/deck/slide-01.jpg",
-    kicker: "Hoofdstuk 01",
-    title: "Verhaal & sfeer",
-    body: "Placeholder-tekst. Vervang dit blok door echte copy wanneer de definitieve beelden klaar staan.",
+    imageSrc: "/images/slide1v2.svg",
+    fullBleedImage: true,
+    stickerSrc: "/images/kroonroze.png",
+    kicker: "",
+    title: "",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-02",
-    imageSrc: "/placeholders/deck/slide-02.jpg",
+    imageSrc: "/images/slide2v2.svg",
+    fullBleedImage: true,
+    deckPolaroidsRightCluster: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 02",
     title: "Keuken & smaak",
-    body: "Tweede paneel in het horizontale deck. Scroll naar beneden op desktop om horizontaal door te gaan.",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-03",
-    imageSrc: "/placeholders/deck/slide-03.jpg",
+    imageSrc: "/images/3.svg",
+    fullBleedImage: true,
+    deckPolaroidsLeft: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Hoofdstuk 03",
     title: "Door het land",
-    body: "Van Antwerpen tot Oostende — dezelfde sfeer op elke locatie. Locaties en beelden vul je centraal op deze site.",
+    body: "",
+    assetFooter: false,
   },
   {
     id: "slide-04",
-    imageSrc: "/placeholders/deck/slide-04-overgang.svg",
+    imageSrc: "/images/4.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
     kicker: "Volgende stap",
     title: "Kom langs",
-    body: "Call-to-action placeholder: reservatie, openingsuren, adres — nog in te vullen.",
+    body: "",
+    assetFooter: false,
+  },
+  {
+    id: "slide-05",
+    imageSrc: "/images/5.svg",
+    fullBleedImage: true,
+    anchorId: "groepen",
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
+    kicker: "Groepen",
+    title: "",
+    body: "",
+    assetFooter: false,
+  },
+  {
+    id: "slide-06",
+    imageSrc: "/images/6.svg",
+    fullBleedImage: true,
+    anchorId: "vacatures",
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
+    kicker: "Vacatures",
+    title: "",
+    body: "",
+    assetFooter: false,
   },
 ];

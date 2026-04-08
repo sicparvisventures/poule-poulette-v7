@@ -74,8 +74,8 @@ export const menuPageCopy = {
     "Blader door de kaart alsof ze open voor je ligt op tafel. Tik op een pagina om dichter in te zoomen.",
   /** Compacte balk onder header/marquee (één regel, met titel). */
   introBar:
-    "Blader door de kaart op tafel · tik op een pagina om in te zoomen · scroll voor de volgende spread",
-  scrollHint: "Scroll omlaag om verder te bladeren · tik om te vergroten",
+    "Blader door de kaart op tafel, zoom in op een pagina en navigeer rustig spread per spread.",
+  scrollHint: "Gebruik de pijlen om te bladeren · tik op een pagina om te vergroten",
   zoomClose: "Sluit vergroting",
   footnote:
     "Prijzen en aanbod kunnen per vestiging licht verschillen — vraag ter plaatse naar de actuele kaart.",

@@ -62,6 +62,26 @@ body {
   }
 }
 
+/* Presentatie-deck: verticale divider (CHRISTMAS) — zelfde duur als horizontale marquee */
+.pp-deck-vertical-marquee-inner {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  height: max-content;
+  will-change: transform;
+  animation: pp-marquee-scroll-y var(--pp-marquee-duration) linear infinite;
+}
+
+@keyframes pp-marquee-scroll-y {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
 /*
  * Custom cursors (desktop): scripts/generate-cursor-asset.py
  * — default + pointer (iets gedraaid t.o.v. default, zelfde stijl als “handje”).

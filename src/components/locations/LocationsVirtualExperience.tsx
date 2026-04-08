@@ -13,7 +13,6 @@ import {
   googleMapsSearchUrl,
   locationsMarqueePhrases,
   locationsPageCopy,
-  officialLocationsUrl,
   type ChainLocation,
 } from "@/content/locations";
 
@@ -78,10 +77,11 @@ function WavyConnector({ compact }: { compact?: boolean }) {
   );
 }
 
-/** Eerste mozaïektegel: lichte “splash”, linkt naar de officiële locatielijst. */
+/** Eerste mozaïektegel: interne brand-splash voor de locaties-ervaring. */
 function LocationsSplashTile() {
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between gap-2 overflow-hidden bg-[#fbf8ec] p-3 text-center sm:p-4">
+    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden bg-[linear-gradient(160deg,#1c3834_0%,#284d47_56%,#16302c_100%)] p-4 text-left text-pp-creme sm:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(244,149,189,0.22),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(253,248,193,0.18),transparent_42%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
         <Image
           src="/images/olive-band-doodle-overlay.png"
@@ -91,45 +91,54 @@ function LocationsSplashTile() {
           sizes="200px"
         />
       </div>
-      <div className="relative z-[2] flex min-h-0 w-full flex-1 flex-col items-center justify-center">
-        <p className="font-accent text-[0.5rem] tracking-[0.28em] text-pp-olive/55 uppercase sm:text-[0.55rem]">
-          {locationsPageCopy.kicker}
-        </p>
-        <p className="mt-1 font-display text-lg leading-tight text-pp-olive sm:text-xl">
-          {locationsPageCopy.splashTitle}
-        </p>
-        <div className="relative mt-2 aspect-square w-[min(4.5rem,38%)] shrink-0 sm:mt-3 sm:w-[min(5.25rem,42%)]">
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-[0.98] drop-shadow-[0_6px_18px_rgb(28_56_52/0.14)]"
-            style={{
-              backgroundColor: "#1c3834",
-              WebkitMaskImage: 'url("/images/hero-pp-lockup.png")',
-              maskImage: 'url("/images/hero-pp-lockup.png")',
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskPosition: "center",
-              maskPosition: "center",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-            }}
-          />
+      <div className="relative z-[2] flex min-h-0 w-full flex-1 flex-col justify-between">
+        <div>
+          <p className="font-accent text-[0.58rem] tracking-[0.28em] text-pp-creme/68 uppercase sm:text-[0.62rem]">
+            {locationsPageCopy.kicker}
+          </p>
+          <p className="mt-2 max-w-[11rem] font-display text-[1.7rem] leading-[0.92] text-pp-creme sm:max-w-none sm:text-[2rem]">
+            {locationsPageCopy.splashTitle}
+          </p>
+          <p className="mt-3 max-w-[15rem] font-accent text-[0.72rem] leading-relaxed tracking-[0.03em] text-pp-creme/72 sm:text-[0.78rem]">
+            {locationsPageCopy.splashLine}
+          </p>
         </div>
-        <p className="mt-2 line-clamp-3 max-w-[11rem] font-accent text-[0.55rem] leading-snug tracking-[0.08em] text-pp-olive/55 uppercase sm:max-w-[13rem] sm:text-[0.58rem]">
-          {brandCitiesLine}
-        </p>
-        <p className="mt-2 line-clamp-4 max-w-[13rem] font-accent text-[0.58rem] leading-relaxed tracking-[0.04em] text-pp-black/62 sm:line-clamp-3 sm:text-[0.62rem]">
-          {locationsPageCopy.splashLine}
-        </p>
+        <div className="mt-5 flex items-end justify-between gap-4">
+          <div className="relative aspect-square w-[4.8rem] shrink-0 sm:w-[5.6rem]">
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-[0.98] drop-shadow-[0_8px_22px_rgb(0_0_0/0.18)]"
+              style={{
+                backgroundColor: "#fdf8c1",
+                WebkitMaskImage: 'url("/images/hero-pp-lockup.png")',
+                maskImage: 'url("/images/hero-pp-lockup.png")',
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+              }}
+            />
+          </div>
+          <div className="min-w-0 text-right">
+            <p className="font-display text-lg italic text-pp-lollypop sm:text-xl">
+              7 vaste stops
+            </p>
+            <p className="mt-1 max-w-[11rem] font-accent text-[0.6rem] leading-relaxed tracking-[0.08em] text-pp-creme/62 uppercase sm:text-[0.65rem]">
+              {brandCitiesLine}
+            </p>
+          </div>
+        </div>
       </div>
-      <a
-        href={officialLocationsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative z-[2] shrink-0 rounded-sm border border-pp-olive/20 bg-pp-white/90 px-3 py-1.5 font-accent text-[0.55rem] tracking-[0.18em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop/50 hover:text-pp-lollypop sm:text-[0.58rem]"
-      >
-        poulepoulette.com/locaties
-      </a>
+      <div className="relative z-[2] mt-4 flex items-center justify-between gap-3 border-t border-pp-creme/14 pt-3">
+        <span className="font-accent text-[0.58rem] tracking-[0.18em] text-pp-creme/62 uppercase">
+          {locationsPageCopy.kicker}
+        </span>
+        <span className="font-accent text-[0.58rem] tracking-[0.18em] text-pp-creme/62 uppercase">
+          Kies een stad →
+        </span>
+      </div>
     </div>
   );
 }
@@ -172,16 +181,16 @@ export function LocationsVirtualExperience() {
   );
 
   const openPrevZoom = useCallback(() => {
-    setZoomIndex((current) =>
-      current === null ? 0 : Math.max(0, current - 1),
-    );
-  }, []);
+    const next = zoomIndex === null ? 0 : Math.max(0, zoomIndex - 1);
+    setZoomIndex(next);
+    setIndex(next);
+  }, [zoomIndex]);
 
   const openNextZoom = useCallback(() => {
-    setZoomIndex((current) =>
-      current === null ? 0 : Math.min(count - 1, current + 1),
-    );
-  }, [count]);
+    const next = zoomIndex === null ? 0 : Math.min(count - 1, zoomIndex + 1);
+    setZoomIndex(next);
+    setIndex(next);
+  }, [count, zoomIndex]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -216,10 +225,6 @@ export function LocationsVirtualExperience() {
     openPrevZoom,
     openNextZoom,
   ]);
-
-  useEffect(() => {
-    if (zoomIndex !== null) setIndex(zoomIndex);
-  }, [zoomIndex]);
 
   useEffect(() => {
     if (zoomIndex === null) return;
@@ -354,16 +359,16 @@ export function LocationsVirtualExperience() {
                 </p>
               </div>
               <p className="font-accent mt-2 text-center text-xs leading-relaxed text-pp-black/60 sm:hidden">
-                Tik op een tegel om te vergroten · nummers hieronder scrollen naar
-                die vestiging.
+                Tik op een tegel om te vergroten en gebruik de stadschips om snel
+                te wisselen.
               </p>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-2 pt-1 sm:px-4 md:px-5">
             <div className="mx-auto w-full max-w-5xl">
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 md:gap-3">
-                <div className="aspect-square overflow-hidden rounded-lg border border-pp-olive/10 bg-[#f4f0e6] shadow-[0_10px_28px_rgb(28_56_52/0.07)]">
+              <div className="grid auto-rows-[minmax(9.25rem,1fr)] grid-cols-2 gap-2 sm:auto-rows-[minmax(11rem,1fr)] sm:gap-3 md:grid-cols-6 md:auto-rows-[minmax(8.5rem,1fr)]">
+                <div className="col-span-2 row-span-2 overflow-hidden rounded-[1.25rem] border border-pp-olive/10 shadow-[0_18px_42px_rgb(28_56_52/0.11)] md:col-span-3 md:row-span-2">
                   <LocationsSplashTile />
                 </div>
                 {chainLocations.map((loc, i) => (
@@ -377,10 +382,16 @@ export function LocationsVirtualExperience() {
                       setIndex(i);
                       setZoomIndex(i);
                     }}
-                    className={`group relative aspect-square overflow-hidden rounded-lg border border-pp-olive/12 bg-[#ebe6dc] text-left shadow-[0_8px_24px_rgb(28_56_52/0.06)] outline-none transition-[box-shadow,border-color] hover:border-pp-olive/22 hover:shadow-[0_14px_36px_rgb(28_56_52/0.1)] focus-visible:ring-2 focus-visible:ring-pp-lollypop focus-visible:ring-offset-2 focus-visible:ring-offset-pp-white ${
+                    className={`group relative overflow-hidden rounded-[1.15rem] border border-pp-olive/12 bg-[#ebe6dc] text-left shadow-[0_12px_28px_rgb(28_56_52/0.08)] outline-none transition-[transform,box-shadow,border-color] hover:-translate-y-0.5 hover:border-pp-olive/22 hover:shadow-[0_18px_42px_rgb(28_56_52/0.12)] focus-visible:ring-2 focus-visible:ring-pp-lollypop focus-visible:ring-offset-2 focus-visible:ring-offset-pp-white ${
                       i === index
                         ? "ring-2 ring-pp-christmas/45 ring-offset-2 ring-offset-pp-white"
                         : ""
+                    } ${
+                      i === 0
+                        ? "col-span-2 row-span-2 md:col-span-3"
+                        : i === 3 || i === 5
+                          ? "col-span-1 row-span-2"
+                          : "col-span-1 row-span-1"
                     }`}
                     aria-label={`${loc.city} — tik om te vergroten`}
                   >
@@ -392,12 +403,21 @@ export function LocationsVirtualExperience() {
                       sizes="(max-width: 768px) 45vw, 180px"
                       priority={i < 2}
                     />
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-pp-black/75 via-pp-black/12 to-transparent px-2 pb-3 pt-12 sm:px-3 sm:pb-3.5 sm:pt-14">
-                      <p className="font-accent text-[0.5rem] tracking-[0.22em] text-pp-creme/85 uppercase sm:text-[0.55rem]">
+                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-pp-black/80 via-pp-black/14 to-transparent" />
+                    <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-pp-creme/16 bg-pp-black/28 px-2 py-1 backdrop-blur-sm">
+                      <p className="font-accent text-[0.5rem] tracking-[0.22em] text-pp-creme/82 uppercase sm:text-[0.54rem]">
+                        {i + 1 < 10 ? `0${i + 1}` : i + 1}
+                      </p>
+                    </div>
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-3.5 pt-16 sm:px-4 sm:pb-4 sm:pt-20">
+                      <p className="font-accent text-[0.5rem] tracking-[0.22em] text-pp-creme/82 uppercase sm:text-[0.56rem]">
                         {loc.city}
                       </p>
-                      <p className="font-display mt-0.5 line-clamp-2 text-sm leading-tight text-pp-creme drop-shadow-md sm:text-base">
+                      <p className="font-display mt-1 line-clamp-2 text-[1rem] leading-tight text-pp-creme drop-shadow-md sm:text-[1.08rem]">
                         {loc.title}
+                      </p>
+                      <p className="font-accent mt-2 hidden max-w-[15rem] text-[0.68rem] leading-relaxed text-pp-creme/72 md:block">
+                        {loc.detailIntro}
                       </p>
                     </div>
                   </button>
@@ -420,7 +440,7 @@ export function LocationsVirtualExperience() {
                     key={loc.id}
                     type="button"
                     onClick={() => scrollToSection(i)}
-                    className={`font-accent flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-[0.65rem] leading-none transition-colors ${
+                    className={`font-accent flex h-9 items-center justify-center rounded-full border px-3 text-[0.62rem] tracking-[0.16em] uppercase leading-none transition-colors ${
                       i === index
                         ? "border-pp-christmas/40 bg-pp-christmas/10 text-pp-christmas"
                         : "border-pp-olive/12 text-pp-olive/50 hover:border-pp-olive/25 hover:text-pp-olive"
@@ -428,7 +448,7 @@ export function LocationsVirtualExperience() {
                     aria-current={i === index ? "true" : undefined}
                     aria-label={`Ga naar ${loc.city}`}
                   >
-                    {i + 1}
+                    {loc.city}
                   </button>
                 ))}
               </nav>
@@ -661,7 +681,7 @@ function LocationZoomModal({
                   </ul>
                 ) : (
                   <p className="mt-2 font-accent text-xs text-pp-creme/50">
-                    Telefoon en e-mail: zie poulepoulette.com voor deze vestiging.
+                    Rechtstreekse contactinfo voor deze vestiging volgt binnenkort.
                   </p>
                 )}
               </div>
@@ -671,30 +691,22 @@ function LocationZoomModal({
                   href={mapsOpen}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-creme/35 bg-pp-creme/10 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme uppercase transition-colors hover:border-pp-lollypop/60 hover:bg-pp-lollypop/15 hover:text-pp-lollypop"
+                  className="font-accent inline-flex items-center justify-center rounded-full border border-pp-creme/35 bg-pp-creme/10 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme uppercase transition-colors hover:border-pp-lollypop/60 hover:bg-pp-lollypop/15 hover:text-pp-lollypop"
                 >
                   Google Maps
                 </a>
                 <Link
                   href="/#reserve"
-                  className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-lollypop/50 bg-pp-lollypop/20 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme uppercase transition-colors hover:bg-pp-lollypop/30"
+                  className="font-accent inline-flex items-center justify-center rounded-full border border-pp-lollypop/50 bg-pp-lollypop/20 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme uppercase transition-colors hover:bg-pp-lollypop/30"
                 >
                   Reserveren
                 </Link>
                 <Link
                   href={`/locations/${location.id}`}
-                  className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-white/20 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme/90 uppercase transition-colors hover:border-pp-white/40 hover:text-pp-creme"
+                  className="font-accent inline-flex items-center justify-center rounded-full border border-pp-white/20 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme/90 uppercase transition-colors hover:border-pp-white/40 hover:text-pp-creme"
                 >
                   Volledige pagina
                 </Link>
-                <a
-                  href={officialLocationsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-white/15 px-3 py-2 text-center text-[0.58rem] tracking-[0.18em] text-pp-creme/80 uppercase transition-colors hover:border-pp-white/35 hover:text-pp-creme"
-                >
-                  Officiële site
-                </a>
               </div>
 
               <div className="overflow-hidden rounded-sm border border-pp-white/12 bg-pp-black/20 shadow-inner">

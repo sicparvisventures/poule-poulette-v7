@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 
 /**
@@ -15,13 +15,7 @@ export function DeckFloatingActions({
   visible: boolean;
   instant: boolean;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (typeof document === "undefined") {
     return null;
   }
 
@@ -58,12 +52,12 @@ export function DeckFloatingActions({
             paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
           }}
         >
-          <a
-            href="#jobs"
+          <Link
+            href="/jobs"
             className="pointer-events-auto font-accent rounded-sm border-2 border-pp-creme/45 bg-pp-olive/96 px-5 py-3 text-[0.62rem] tracking-[0.32em] text-pp-creme uppercase shadow-[0_6px_24px_rgb(6_7_9/0.45)] transition-[border-color,color,transform,box-shadow] duration-200 hover:border-pp-lollypop/85 hover:text-pp-lollypop hover:shadow-[0_8px_28px_rgb(28_56_52/0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-creme active:scale-[0.98] md:px-6 md:py-3.5 md:text-[0.66rem]"
           >
             Jobs
-          </a>
+          </Link>
         </motion.div>
       ) : null}
     </AnimatePresence>,

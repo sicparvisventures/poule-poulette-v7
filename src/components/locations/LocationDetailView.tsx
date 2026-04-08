@@ -3,10 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  officialLocationsUrl,
-  type ChainLocation,
-} from "@/content/locations";
+import { type ChainLocation } from "@/content/locations";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -147,39 +144,30 @@ export function LocationDetailView({ location }: Props) {
 
             {!hasTel && !hasMail ? (
               <p className="font-accent text-sm text-pp-black/55">
-                Telefoon en e-mail voor deze vestiging: zie{" "}
-                <a
-                  href={officialLocationsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-pp-olive underline decoration-pp-olive/35 underline-offset-2 transition-colors hover:text-pp-christmas"
-                >
-                  poulepoulette.com/locaties
-                </a>
-                .
+                Rechtstreekse contactinfo voor deze vestiging wordt binnenkort
+                toegevoegd. Gebruik intussen de routeknop of reserveer via de
+                site.
               </p>
             ) : null}
 
-            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
               <a
                 href={mapsHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-olive bg-pp-olive px-5 py-3 text-center text-[0.62rem] tracking-[0.24em] text-pp-creme uppercase transition-colors hover:border-pp-christmas hover:bg-pp-christmas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-olive"
+                className="font-accent inline-flex items-center justify-center rounded-full border border-pp-olive bg-pp-olive px-5 py-3 text-center text-[0.62rem] tracking-[0.24em] text-pp-creme uppercase transition-colors hover:border-pp-christmas hover:bg-pp-christmas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-olive"
               >
                 Open in Maps
               </a>
-              <a
-                href={officialLocationsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-olive/35 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:text-pp-lollypop"
+              <Link
+                href="/#reserve"
+                className="font-accent inline-flex items-center justify-center rounded-full border border-pp-lollypop/45 bg-pp-lollypop/10 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:bg-pp-lollypop/18 hover:text-pp-black"
               >
-                Alle locaties (officieel)
-              </a>
+                Reserveer
+              </Link>
               <Link
                 href="/locations"
-                className="font-accent inline-flex items-center justify-center rounded-sm border border-pp-olive/35 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:text-pp-lollypop"
+                className="font-accent inline-flex items-center justify-center rounded-full border border-pp-olive/35 px-5 py-3 text-center text-[0.62rem] tracking-[0.22em] text-pp-olive uppercase transition-colors hover:border-pp-lollypop hover:text-pp-lollypop"
               >
                 Mozaïek
               </Link>

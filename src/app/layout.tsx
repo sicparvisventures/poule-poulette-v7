@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 
 const baconKingdom = localFont({
@@ -32,6 +33,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-pp-white text-pp-black">
         {children}
+        <Script
+          id="keak-script"
+          src="https://script.keak.com/v1/1589"
+          data-domain="1589"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
