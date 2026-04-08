@@ -81,4 +81,24 @@ export const deckSlides: DeckSlide[] = [
     body: "",
     assetFooter: false,
   },
+  {
+    id: "slide-05",
+    imageSrc: "/images/5.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
+    kicker: "Hoofdstuk 05",
+    title: "",
+    body: "",
+    assetFooter: false,
+  },
+  {
+    id: "slide-06",
+    imageSrc: "/images/6.svg",
+    fullBleedImage: true,
+    /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
+    kicker: "Hoofdstuk 06",
+    title: "",
+    body: "",
+    assetFooter: false,
+  },
 ];

@@ -161,10 +161,9 @@ export function DeckDesktopSlideArticle({
       : ({} as { id?: string });
 
   /**
-   * Rode naad uit na slide 2 (i=1) en na slide 3 (i=2): illustraties lopen naadloos door.
+   * Rode naad alleen tussen slide 1 en 2; alle volgende full-bleed slides lopen naadloos door.
    */
-  const showSeamAfter =
-    i < slideCount - 1 && i !== 1 && i !== 2;
+  const showSeamAfter = i === 0 && i < slideCount - 1;
 
   if (slide.fullBleedImage) {
     return (
