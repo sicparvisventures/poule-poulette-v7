@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   AnimatePresence,
@@ -300,7 +299,7 @@ export function HomeExperience() {
           <main
             ref={mainRef}
             id="content"
-            className={`relative flex flex-1 flex-col outline-none ${!splashActive ? "pb-28 md:pb-32" : ""}`}
+            className={`relative flex flex-col outline-none ${splashActive ? "min-h-full flex-1" : ""} ${!splashActive && !desktopHorizontalJourney ? "pb-24 md:pb-28" : ""}`}
             tabIndex={-1}
           >
             {(splashActive || !desktopHorizontalJourney) ? (
@@ -342,47 +341,6 @@ export function HomeExperience() {
                       chickenSpot={chickenSpot}
                       desktopHorizontalRail
                     />
-                  }
-                  jobsPanel={
-                    <section
-                      id="jobs"
-                      tabIndex={-1}
-                      className="flex min-h-full flex-col scroll-mt-28 border-t border-pp-olive/10 bg-pp-white px-6 py-10 text-pp-olive md:py-12"
-                      aria-labelledby="pp-jobs-heading"
-                    >
-                      <span className="sr-only">
-                        Doel van de zwevende knop Jobs op dit scherm.
-                      </span>
-                      <h2
-                        id="pp-jobs-heading"
-                        className="font-display text-xl md:text-2xl"
-                      >
-                        Vacatures
-                      </h2>
-                      <p className="font-accent mt-2 max-w-lg text-sm text-pp-black/55">
-                        Inhoud volgt.
-                      </p>
-                    </section>
-                  }
-                  reservePanel={
-                    <section
-                      id="reserve"
-                      tabIndex={-1}
-                      className="flex min-h-full flex-col scroll-mt-28 border-t border-pp-olive/10 bg-pp-creme/20 px-6 py-10 md:py-12"
-                      aria-labelledby="pp-reserve-heading"
-                    >
-                      <h2 id="pp-reserve-heading" className="sr-only">
-                        Reserveren
-                      </h2>
-                      <Reserve4YouWidget />
-                    </section>
-                  }
-                  footerPanel={
-                    <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
-                      <p className="font-accent text-sm text-pp-olive/70">
-                        © Poule &amp; Poulette
-                      </p>
-                    </div>
                   }
                 />
               </>
@@ -429,12 +387,6 @@ export function HomeExperience() {
               </>
             ) : null}
           </main>
-
-          {!desktopHorizontalJourney ? (
-            <footer className="border-t border-pp-olive/10 bg-pp-white px-6 py-6 text-center text-sm text-pp-olive/70">
-              <p className="font-accent">© Poule &amp; Poulette</p>
-            </footer>
-          ) : null}
         </div>
       </div>
     </LayoutGroup>

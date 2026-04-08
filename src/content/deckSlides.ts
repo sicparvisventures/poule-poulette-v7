@@ -20,6 +20,8 @@ export type DeckSlide = {
   deckPolaroidsLeft?: boolean;
   /** Desktop: polaroids rechts op dit paneel (slide 2 i.v.m. naad naar slide 3). */
   deckPolaroidsRightCluster?: boolean;
+  /** Optioneel HTML-id op het paneel (ankers, o.a. #groepen / #vacatures). */
+  anchorId?: string;
   /**
    * Voettekst onder het body-blok.
    * - `undefined`: standaard placeholder voor ontwerpers.
@@ -85,8 +87,9 @@ export const deckSlides: DeckSlide[] = [
     id: "slide-05",
     imageSrc: "/images/5.svg",
     fullBleedImage: true,
+    anchorId: "groepen",
     /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
-    kicker: "Hoofdstuk 05",
+    kicker: "Groepen",
     title: "",
     body: "",
     assetFooter: false,
@@ -95,8 +98,9 @@ export const deckSlides: DeckSlide[] = [
     id: "slide-06",
     imageSrc: "/images/6.svg",
     fullBleedImage: true,
+    anchorId: "vacatures",
     /** Alleen voor journey-nav / toegankelijkheid; niet zichtbaar op full-bleed slide. */
-    kicker: "Hoofdstuk 06",
+    kicker: "Vacatures",
     title: "",
     body: "",
     assetFooter: false,

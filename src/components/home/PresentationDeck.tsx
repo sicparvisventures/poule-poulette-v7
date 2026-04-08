@@ -158,7 +158,9 @@ export function DeckDesktopSlideArticle({
   const articleProps =
     i === 0 && presentatieId
       ? { id: presentatieId }
-      : ({} as { id?: string });
+      : slide.anchorId
+        ? { id: slide.anchorId }
+        : ({} as { id?: string });
 
   /**
    * Rode naad alleen tussen slide 1 en 2; alle volgende full-bleed slides lopen naadloos door.
@@ -298,7 +300,10 @@ function PresentationDeckMobile({
           return (
           <li key={slide.id} className={liBorder}>
             {slide.fullBleedImage ? (
-              <article aria-label={`Slide ${i + 1} van ${slideCount}`}>
+              <article
+                aria-label={`Slide ${i + 1} van ${slideCount}`}
+                {...(slide.anchorId ? { id: slide.anchorId } : {})}
+              >
                 <div className="relative aspect-16/10 w-full min-h-[min(52vh,480px)] overflow-visible bg-pp-black md:min-h-[min(70vh,560px)]">
                   <Image
                     src={slide.imageSrc}

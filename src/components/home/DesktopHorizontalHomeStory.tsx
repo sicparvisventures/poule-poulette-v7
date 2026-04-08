@@ -16,26 +16,20 @@ type Props = {
   journeyLabelId: string;
   /** Alleen de hero; de lollypop-marquee zit rechts in de smalle rail (zelfde als horizontale band). */
   hero: React.ReactNode;
-  jobsPanel: React.ReactNode;
-  reservePanel: React.ReactNode;
-  footerPanel: React.ReactNode;
 };
 
 /**
  * Desktop: één verticale scroll-afstand stuurt alle panelen horizontaal
- * (hero + rechter olijfrail met horizontale marquee → slides → jobs → reserve → footer).
+ * (hero + rechter olijfrail → deck-slides; geen aparte jobs/reserve/footer-panelen meer).
  */
 export function DesktopHorizontalHomeStory({
   journeyLabelId,
   hero,
-  jobsPanel,
-  reservePanel,
-  footerPanel,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const vw = useViewportWidth();
   const slideCount = deckSlides.length;
-  const panelCount = 1 + slideCount + 3;
+  const panelCount = 1 + slideCount;
   const maxShift = useMemo(() => (panelCount - 1) * vw, [panelCount, vw]);
 
   const journeyPanels = useMemo((): JourneyPanel[] => {
@@ -46,13 +40,7 @@ export function DesktopHorizontalHomeStory({
         slide.kicker?.trim() ||
         (i === 0 ? "Story" : `Section ${i + 1}`),
     }));
-    return [
-      { id: "journey-hero", label: "Home" },
-      ...slidePanels,
-      { id: "journey-jobs", label: "Jobs" },
-      { id: "journey-reserve", label: "Reserve" },
-      { id: "journey-footer", label: "Contact" },
-    ];
+    return [{ id: "journey-hero", label: "Home" }, ...slidePanels];
   }, []);
 
   const { scrollYProgress } = useScroll({
@@ -70,7 +58,7 @@ export function DesktopHorizontalHomeStory({
   return (
     <section
       ref={containerRef}
-      className="hidden md:block"
+      className="hidden bg-pp-olive md:block"
       style={{ height: `${(panelCount - 1) * 100}vh` }}
       aria-labelledby={journeyLabelId}
     >
@@ -106,15 +94,6 @@ export function DesktopHorizontalHomeStory({
               presentatieId={i === 0 ? "presentatie" : undefined}
             />
           ))}
-          <div className="h-full w-screen shrink-0 overflow-y-auto overflow-x-hidden bg-pp-white [scrollbar-gutter:stable]">
-            {jobsPanel}
-          </div>
-          <div className="h-full w-screen shrink-0 overflow-y-auto overflow-x-hidden bg-pp-creme/20 [scrollbar-gutter:stable]">
-            {reservePanel}
-          </div>
-          <div className="flex h-full min-h-0 w-screen shrink-0 flex-col justify-center overflow-y-auto overflow-x-hidden bg-pp-white px-6 py-10 [scrollbar-gutter:stable]">
-            {footerPanel}
-          </div>
         </motion.div>
       </div>
     </section>
