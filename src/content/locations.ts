@@ -9,6 +9,9 @@ export const brandTagline = "Fun loving food moments" as const;
 export const brandCitiesLine =
   "Antwerpen Eilandje · Brussel · Etterbeek · Gent · Leuven · Mechelen · Oostende · Merode · Brugge · Brussels Expo" as const;
 
+/** Link naar het locaties-overzicht (CTA’s op detail en /locations). */
+export const officialLocationsUrl = "/locations" as const;
+
 const locImg = {
   antwerpen: "/locations/antwerpen.jpg",
   brussel: "/locations/brussel.jpg",
