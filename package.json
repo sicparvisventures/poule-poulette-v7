@@ -9,7 +9,11 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:v7": "bash ./scripts/sync-with-ppsite.sh to-v7",
+    "sync:from-v7": "bash ./scripts/sync-with-ppsite.sh to-ppsite",
+    "sync:from-ppsite": "bash ./scripts/sync-with-ppsite.sh to-v7",
+    "sync:ppsite": "bash ./scripts/sync-with-ppsite.sh to-ppsite"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",

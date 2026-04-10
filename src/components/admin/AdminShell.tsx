@@ -147,28 +147,13 @@ function Frame({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="border-b border-pp-creme/10 pb-5">
-          <div className={`flex items-start ${sidebarCollapsed ? "justify-center" : "justify-between gap-3"}`}>
-            <div className={sidebarCollapsed ? "text-center" : ""}>
+          <div className={`${sidebarCollapsed ? "text-center" : ""}`}>
               <p className="font-accent text-[0.58rem] tracking-[0.28em] text-pp-creme/65 uppercase">
                 {sidebarCollapsed ? "CH" : "Content Hub Pro"}
               </p>
               <p className={`font-display mt-2 text-3xl ${sidebarCollapsed ? "text-[1.7rem]" : ""}`}>
                 {sidebarCollapsed ? "PP" : "Marketing Admin"}
               </p>
-            </div>
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className={`shrink-0 rounded-sm border border-pp-creme/15 bg-pp-creme/6 text-pp-creme/80 transition-colors hover:border-pp-lollypop hover:text-pp-lollypop ${
-                sidebarCollapsed ? "hidden" : "px-2 py-1.5"
-              }`}
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 stroke-current" aria-hidden>
-                <path d="M15 6l-6 6 6 6" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
           </div>
           {!sidebarCollapsed ? (
             <p className="font-accent mt-3 text-sm leading-relaxed text-pp-creme/72">
