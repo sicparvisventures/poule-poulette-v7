@@ -3,19 +3,59 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { MediaAssetPickerField } from "@/components/admin/MediaAssetPickerField";
 import type { JobsLocale } from "@/content/jobsPage";
+import {
+  createFolder,
+  deleteMediaAssets,
+  getFolderDescendantIds,
+  moveFolder,
+  replaceMediaUsage,
+} from "@/lib/marketing-admin/media";
 import { useMarketingAdmin } from "@/lib/marketing-admin/store";
 import type {
+  AdminRole,
   ContentStatus,
   ManagedJob,
   ManagedLocation,
   ManagedMenuSection,
+  MediaAssetUsage,
+  MediaFolder,
+  MediaAsset,
   MarketingAdminState,
   Promotion,
 } from "@/lib/marketing-admin/types";
 
 const LOCALES: JobsLocale[] = ["nl", "en", "fr"];
 const STATUSES: ContentStatus[] = ["draft", "published", "archived"];
+
+function slugifyFolderName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function formatBytes(value: number) {
+  if (!value) return "Seeded asset";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mediaTypeLabel(type: MediaAsset["type"]) {
+  switch (type) {
+    case "svg":
+      return "SVG";
+    case "video":
+      return "Video";
+    case "document":
+      return "Document";
+    default:
+      return "Image";
+  }
+}
 
 function SectionHeader({
   title,
@@ -92,7 +132,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`mt-1 w-full rounded-[0.75rem] border border-pp-olive/14 bg-white px-3 py-2.5 text-sm text-pp-black outline-none transition-colors focus:border-pp-lollypop ${props.className ?? ""}`}
+      className={`mt-1 w-full border border-pp-olive/14 bg-white px-3 py-2.5 text-sm text-pp-black outline-none transition-colors focus:border-pp-lollypop disabled:cursor-not-allowed disabled:bg-[#f4efdf] disabled:text-pp-black/45 ${props.className ?? ""}`}
     />
   );
 }
@@ -101,7 +141,7 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={`mt-1 min-h-28 w-full rounded-[0.95rem] border border-pp-olive/14 bg-white px-3 py-2.5 text-sm leading-relaxed text-pp-black outline-none transition-colors focus:border-pp-lollypop ${props.className ?? ""}`}
+      className={`mt-1 min-h-28 w-full border border-pp-olive/14 bg-white px-3 py-2.5 text-sm leading-relaxed text-pp-black outline-none transition-colors focus:border-pp-lollypop disabled:cursor-not-allowed disabled:bg-[#f4efdf] disabled:text-pp-black/45 ${props.className ?? ""}`}
     />
   );
 }
@@ -110,7 +150,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className={`mt-1 w-full rounded-[0.75rem] border border-pp-olive/14 bg-white px-3 py-2.5 text-sm text-pp-black outline-none transition-colors focus:border-pp-lollypop ${props.className ?? ""}`}
+      className={`mt-1 w-full border border-pp-olive/14 bg-white px-3 py-2.5 text-sm text-pp-black outline-none transition-colors focus:border-pp-lollypop disabled:cursor-not-allowed disabled:bg-[#f4efdf] disabled:text-pp-black/45 ${props.className ?? ""}`}
     />
   );
 }
@@ -130,6 +170,47 @@ function MiniStat({
       <p className="mt-2 font-display text-3xl">{value}</p>
     </div>
   );
+}
+
+function PermissionNotice({
+  role,
+  mode,
+}: {
+  role: AdminRole;
+  mode: "view" | "publish";
+}) {
+  const message =
+    mode === "publish"
+      ? `Ingelogd als ${role}. Publicatievelden zijn alleen actief voor publisher of super admin.`
+      : `Ingelogd als ${role}. Deze tab staat momenteel in read-only modus.`;
+
+  return (
+    <div className="border border-amber-300/35 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      {message}
+    </div>
+  );
+}
+
+function FlatSection({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`border border-pp-olive/10 bg-[#fffdf6] ${className}`}>
+      {children}
+    </section>
+  );
+}
+
+function attachAssetToEntity(
+  current: MarketingAdminState,
+  assetId: string,
+  usage: MediaAssetUsage,
+) {
+  return replaceMediaUsage(current, assetId, usage);
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -367,7 +448,7 @@ export function DashboardView() {
 }
 
 export function LocationsView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -375,6 +456,11 @@ export function LocationsView() {
         title="Locations"
         intro="Werk vestigingscontent bij zoals marketing ermee denkt: hero copy bovenaan, daaronder de kaarten per locatie met beeld, status en praktische info."
       />
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <Surface>
@@ -387,6 +473,7 @@ export function LocationsView() {
               <FieldLabel>Intro</FieldLabel>
               <Textarea
                 value={state.locationsPageCopy.intro}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "locationsPageCopy", "locations-intro", (current) => ({
                     ...current,
@@ -402,6 +489,7 @@ export function LocationsView() {
               <FieldLabel>Marquee phrases</FieldLabel>
               <Textarea
                 value={state.locationsPageCopy.marqueePhrases.join("\n")}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "locationsPageCopy", "locations-marquee", (current) => ({
                     ...current,
@@ -428,6 +516,8 @@ export function LocationsView() {
             <LocationEditor
               key={location.id}
               location={location}
+              canEdit={permissions.canEdit}
+              canPublish={permissions.canPublish}
               onChange={(field, value) =>
                 updateWithAudit(setState, addAuditEntry, "update", "location", location.id, (current) => ({
                   ...current,
@@ -437,6 +527,32 @@ export function LocationsView() {
                       : entry,
                   ),
                 }))
+              }
+              onAssignImage={(asset) =>
+                updateWithAudit(setState, addAuditEntry, "link", "location", location.id, (current) =>
+                  attachAssetToEntity(
+                    {
+                      ...current,
+                      locations: current.locations.map((entry, entryIndex) =>
+                        entryIndex === index
+                          ? {
+                              ...entry,
+                              imageSrc: asset.src,
+                              imageAlt: asset.altText || entry.imageAlt,
+                              updatedAt: new Date().toISOString(),
+                            }
+                          : entry,
+                      ),
+                    },
+                    asset.id,
+                    {
+                      entity: "location",
+                      entityId: location.id,
+                      label: location.city,
+                      route: `/locations/${location.id}`,
+                    },
+                  ),
+                )
               }
             />
           ))}
@@ -448,10 +564,16 @@ export function LocationsView() {
 
 function LocationEditor({
   location,
+  canEdit,
+  canPublish,
   onChange,
+  onAssignImage,
 }: {
   location: ManagedLocation;
+  canEdit: boolean;
+  canPublish: boolean;
   onChange: (field: keyof ManagedLocation, value: ManagedLocation[keyof ManagedLocation]) => void;
+  onAssignImage: (asset: MediaAsset) => void;
 }) {
   return (
     <Surface className="overflow-hidden p-0">
@@ -479,11 +601,12 @@ function LocationEditor({
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
               <FieldLabel>City label</FieldLabel>
-              <Input value={location.city} onChange={(event) => onChange("city", event.target.value)} />
+              <Input disabled={!canEdit} value={location.city} onChange={(event) => onChange("city", event.target.value)} />
             </div>
             <div>
               <FieldLabel>Status</FieldLabel>
               <Select
+                disabled={!canPublish}
                 value={location.status}
                 onChange={(event) => onChange("status", event.target.value as ContentStatus)}
               >
@@ -496,15 +619,20 @@ function LocationEditor({
             </div>
             <div className="lg:col-span-2">
               <FieldLabel>Page title</FieldLabel>
-              <Input value={location.title} onChange={(event) => onChange("title", event.target.value)} />
+              <Input disabled={!canEdit} value={location.title} onChange={(event) => onChange("title", event.target.value)} />
             </div>
             <div className="lg:col-span-2">
-              <FieldLabel>Hero image</FieldLabel>
-              <Input value={location.imageSrc} onChange={(event) => onChange("imageSrc", event.target.value)} />
+              <MediaAssetPickerField
+                label="Hero image"
+                valueSrc={location.imageSrc}
+                disabled={!canEdit}
+                onSelect={onAssignImage}
+              />
             </div>
             <div className="lg:col-span-2">
               <FieldLabel>Detail intro</FieldLabel>
               <Textarea
+                disabled={!canEdit}
                 value={location.detailIntro}
                 onChange={(event) => onChange("detailIntro", event.target.value)}
               />
@@ -514,6 +642,7 @@ function LocationEditor({
             <input
               type="checkbox"
               checked={location.isFeatured}
+              disabled={!canEdit}
               onChange={(event) => onChange("isFeatured", event.target.checked)}
             />
             Featured locatie op dashboard / highlight-lijsten
@@ -525,7 +654,7 @@ function LocationEditor({
 }
 
 export function MenuView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -533,6 +662,11 @@ export function MenuView() {
         title="Menu"
         intro="De menu-editor is nu opgezet als redactionele sequencer: page copy links, slides rechts, telkens met preview en korte copy."
       />
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <Surface>
@@ -545,6 +679,7 @@ export function MenuView() {
               <FieldLabel>Titel</FieldLabel>
               <Input
                 value={state.menuPageCopy.title}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "menuPageCopy", "title", (current) => ({
                     ...current,
@@ -557,6 +692,7 @@ export function MenuView() {
               <FieldLabel>Intro bar</FieldLabel>
               <Input
                 value={state.menuPageCopy.introBar}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "menuPageCopy", "introBar", (current) => ({
                     ...current,
@@ -569,6 +705,7 @@ export function MenuView() {
               <FieldLabel>Footnote</FieldLabel>
               <Textarea
                 value={state.menuPageCopy.footnote}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "menuPageCopy", "footnote", (current) => ({
                     ...current,
@@ -586,6 +723,8 @@ export function MenuView() {
               key={section.id}
               section={section}
               index={index}
+              canEdit={permissions.canEdit}
+              canPublish={permissions.canPublish}
               onUpdate={(nextSection) =>
                 updateWithAudit(setState, addAuditEntry, "update", "menuSection", section.id, (current) => ({
                   ...current,
@@ -593,6 +732,27 @@ export function MenuView() {
                     entryIndex === index ? nextSection : entry,
                   ),
                 }))
+              }
+              onAssignAsset={(asset) =>
+                updateWithAudit(setState, addAuditEntry, "link", "menuSection", section.id, (current) =>
+                  attachAssetToEntity(
+                    {
+                      ...current,
+                      menuSections: current.menuSections.map((entry, entryIndex) =>
+                        entryIndex === index
+                          ? { ...entry, src: asset.src, updatedAt: new Date().toISOString() }
+                          : entry,
+                      ),
+                    },
+                    asset.id,
+                    {
+                      entity: "menuSection",
+                      entityId: section.id,
+                      label: section.label,
+                      route: "/menu",
+                    },
+                  ),
+                )
               }
             />
           ))}
@@ -605,11 +765,17 @@ export function MenuView() {
 function MenuSectionEditor({
   section,
   index,
+  canEdit,
+  canPublish,
   onUpdate,
+  onAssignAsset,
 }: {
   section: ManagedMenuSection;
   index: number;
+  canEdit: boolean;
+  canPublish: boolean;
   onUpdate: (nextSection: ManagedMenuSection) => void;
+  onAssignAsset: (asset: MediaAsset) => void;
 }) {
   return (
     <Surface className="overflow-hidden p-0">
@@ -626,11 +792,11 @@ function MenuSectionEditor({
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
               <FieldLabel>Label</FieldLabel>
-              <Input value={section.label} onChange={(event) => onUpdate({ ...section, label: event.target.value, updatedAt: new Date().toISOString() })} />
+              <Input disabled={!canEdit} value={section.label} onChange={(event) => onUpdate({ ...section, label: event.target.value, updatedAt: new Date().toISOString() })} />
             </div>
             <div>
               <FieldLabel>Status</FieldLabel>
-              <Select value={section.status} onChange={(event) => onUpdate({ ...section, status: event.target.value as ContentStatus, updatedAt: new Date().toISOString() })}>
+              <Select disabled={!canPublish} value={section.status} onChange={(event) => onUpdate({ ...section, status: event.target.value as ContentStatus, updatedAt: new Date().toISOString() })}>
                 {STATUSES.map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -639,12 +805,16 @@ function MenuSectionEditor({
               </Select>
             </div>
             <div className="lg:col-span-2">
-              <FieldLabel>Image src</FieldLabel>
-              <Input value={section.src} onChange={(event) => onUpdate({ ...section, src: event.target.value, updatedAt: new Date().toISOString() })} />
+              <MediaAssetPickerField
+                label="Slide asset"
+                valueSrc={section.src}
+                disabled={!canEdit}
+                onSelect={onAssignAsset}
+              />
             </div>
             <div className="lg:col-span-2">
               <FieldLabel>Blurb</FieldLabel>
-              <Textarea value={section.blurb} onChange={(event) => onUpdate({ ...section, blurb: event.target.value, updatedAt: new Date().toISOString() })} />
+              <Textarea disabled={!canEdit} value={section.blurb} onChange={(event) => onUpdate({ ...section, blurb: event.target.value, updatedAt: new Date().toISOString() })} />
             </div>
           </div>
         </div>
@@ -654,7 +824,7 @@ function MenuSectionEditor({
 }
 
 export function JobsView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -662,6 +832,11 @@ export function JobsView() {
         title="Jobs"
         intro="Copy en vacatures zijn gegroepeerd zoals marketing ze beheert: eerst de page messaging, daarna de jobcards met meertalige samenvattingen."
       />
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <Surface>
           <PanelHeader
@@ -674,6 +849,7 @@ export function JobsView() {
                 <FieldLabel>Intro {locale.toUpperCase()}</FieldLabel>
                 <Textarea
                   value={state.jobsPageCopy.intro[locale]}
+                  disabled={!permissions.canEdit}
                   onChange={(event) =>
                     updateWithAudit(setState, addAuditEntry, "update", "jobsPageCopy", locale, (current) => ({
                       ...current,
@@ -697,6 +873,8 @@ export function JobsView() {
             <JobEditor
               key={job.id}
               job={job}
+              canEdit={permissions.canEdit}
+              canPublish={permissions.canPublish}
               onUpdate={(nextJob) =>
                 updateWithAudit(setState, addAuditEntry, "update", "job", job.id, (current) => ({
                   ...current,
@@ -715,9 +893,13 @@ export function JobsView() {
 
 function JobEditor({
   job,
+  canEdit,
+  canPublish,
   onUpdate,
 }: {
   job: ManagedJob;
+  canEdit: boolean;
+  canPublish: boolean;
   onUpdate: (job: ManagedJob) => void;
 }) {
   return (
@@ -730,15 +912,15 @@ function JobEditor({
       <div className="grid gap-4 lg:grid-cols-3">
         <div>
           <FieldLabel>Type</FieldLabel>
-          <Input value={job.type} onChange={(event) => onUpdate({ ...job, type: event.target.value, updatedAt: new Date().toISOString() })} />
+          <Input disabled={!canEdit} value={job.type} onChange={(event) => onUpdate({ ...job, type: event.target.value, updatedAt: new Date().toISOString() })} />
         </div>
         <div>
           <FieldLabel>Plaats</FieldLabel>
-          <Input value={job.place} onChange={(event) => onUpdate({ ...job, place: event.target.value, updatedAt: new Date().toISOString() })} />
+          <Input disabled={!canEdit} value={job.place} onChange={(event) => onUpdate({ ...job, place: event.target.value, updatedAt: new Date().toISOString() })} />
         </div>
         <div>
           <FieldLabel>Status</FieldLabel>
-          <Select value={job.status} onChange={(event) => onUpdate({ ...job, status: event.target.value as ContentStatus, updatedAt: new Date().toISOString() })}>
+          <Select disabled={!canPublish} value={job.status} onChange={(event) => onUpdate({ ...job, status: event.target.value as ContentStatus, updatedAt: new Date().toISOString() })}>
             {STATUSES.map((status) => (
               <option key={status} value={status}>
                 {status}
@@ -752,6 +934,7 @@ function JobEditor({
           <div key={locale} className="rounded-[0.95rem] border border-pp-olive/9 bg-white/80 p-4">
             <FieldLabel>Titel {locale.toUpperCase()}</FieldLabel>
             <Input
+              disabled={!canEdit}
               value={job.title[locale]}
               onChange={(event) =>
                 onUpdate({
@@ -764,6 +947,7 @@ function JobEditor({
             <div className="mt-4">
               <FieldLabel>Summary {locale.toUpperCase()}</FieldLabel>
               <Textarea
+                disabled={!canEdit}
                 value={job.summary[locale]}
                 onChange={(event) =>
                   onUpdate({
@@ -782,7 +966,7 @@ function JobEditor({
 }
 
 export function GroupsView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -790,6 +974,11 @@ export function GroupsView() {
         title="Groups"
         intro="Groepsformules zijn hier compacter opgezet, met preview van de kaart en kerncopy in één editorblok per formule."
       />
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
         <Surface>
           <PanelHeader
@@ -799,6 +988,7 @@ export function GroupsView() {
           <FieldLabel>Intro</FieldLabel>
           <Textarea
             value={state.groupsPageCopy.intro}
+            disabled={!permissions.canEdit}
             onChange={(event) =>
               updateWithAudit(setState, addAuditEntry, "update", "groupsPageCopy", "groups-page", (current) => ({
                 ...current,
@@ -831,6 +1021,7 @@ export function GroupsView() {
                     <div>
                       <FieldLabel>Label</FieldLabel>
                       <Input
+                        disabled={!permissions.canEdit}
                         value={group.label}
                         onChange={(event) =>
                           updateWithAudit(setState, addAuditEntry, "update", "groupTier", group.id, (current) => ({
@@ -845,6 +1036,7 @@ export function GroupsView() {
                     <div>
                       <FieldLabel>Tagline</FieldLabel>
                       <Input
+                        disabled={!permissions.canEdit}
                         value={group.tagline}
                         onChange={(event) =>
                           updateWithAudit(setState, addAuditEntry, "update", "groupTier", group.id, (current) => ({
@@ -857,8 +1049,42 @@ export function GroupsView() {
                       />
                     </div>
                     <div className="lg:col-span-2">
+                      <MediaAssetPickerField
+                        label="Groepen asset"
+                        valueSrc={group.src}
+                        disabled={!permissions.canEdit}
+                        onSelect={(asset) =>
+                          updateWithAudit(setState, addAuditEntry, "link", "groupTier", group.id, (current) =>
+                            attachAssetToEntity(
+                              {
+                                ...current,
+                                groups: current.groups.map((entry, entryIndex) =>
+                                  entryIndex === index
+                                    ? {
+                                        ...entry,
+                                        src: asset.src,
+                                        alt: asset.altText || entry.alt,
+                                        updatedAt: new Date().toISOString(),
+                                      }
+                                    : entry,
+                                ),
+                              },
+                              asset.id,
+                              {
+                                entity: "groupTier",
+                                entityId: group.id,
+                                label: group.label,
+                                route: "/groepen",
+                              },
+                            ),
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="lg:col-span-2">
                       <FieldLabel>Blurb</FieldLabel>
                       <Textarea
+                        disabled={!permissions.canEdit}
                         value={group.blurb}
                         onChange={(event) =>
                           updateWithAudit(setState, addAuditEntry, "update", "groupTier", group.id, (current) => ({
@@ -882,15 +1108,16 @@ export function GroupsView() {
 }
 
 export function PromotionsView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
       <SectionHeader
         title="Promotions"
-        intro="Promoties zijn hier opgezet als campagnes met duidelijke status, placement en meertalige copyblokken."
+        intro="Campagnes zijn hier opgezet als strakke werkrijen in plaats van losse KPI-cards. Copy, timing, image en publicatiestatus zitten in één operationele flow."
         actions={
           <ActionButton
+            disabled={!permissions.canEdit}
             onClick={() =>
               updateWithAudit(setState, addAuditEntry, "create", "promotion", `promotion-${Date.now()}`, (current) => ({
                 ...current,
@@ -906,6 +1133,7 @@ export function PromotionsView() {
                     ctaLabel: "Bekijk",
                     ctaHref: "/menu",
                     priority: 1,
+                    imageSrc: current.mediaAssets[0]?.src,
                     updatedAt: new Date().toISOString(),
                   },
                   ...current.promotions,
@@ -917,16 +1145,23 @@ export function PromotionsView() {
           </ActionButton>
         }
       />
-      <div className="grid gap-4 md:grid-cols-3">
-        <MiniStat label="live promo's" value={state.promotions.filter((item) => item.status === "active").length} />
-        <MiniStat label="draft promo's" value={state.promotions.filter((item) => item.status === "draft").length} />
-        <MiniStat label="placements" value={new Set(state.promotions.map((item) => item.placement)).size} />
-      </div>
-      <div className="mt-6 space-y-4">
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
+      {!permissions.canPublish ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="publish" />
+        </div>
+      ) : null}
+      <div className="space-y-3">
         {state.promotions.map((promotion, index) => (
           <PromotionEditor
             key={promotion.id}
             promotion={promotion}
+            canEdit={permissions.canEdit}
+            canPublish={permissions.canPublish}
             onUpdate={(nextPromotion) =>
               updateWithAudit(setState, addAuditEntry, "update", "promotion", promotion.id, (current) => ({
                 ...current,
@@ -934,6 +1169,27 @@ export function PromotionsView() {
                   entryIndex === index ? nextPromotion : entry,
                 ),
               }))
+            }
+            onAssignImage={(asset) =>
+              updateWithAudit(setState, addAuditEntry, "link", "promotion", promotion.id, (current) =>
+                attachAssetToEntity(
+                  {
+                    ...current,
+                    promotions: current.promotions.map((entry, entryIndex) =>
+                      entryIndex === index
+                        ? { ...entry, imageSrc: asset.src, updatedAt: new Date().toISOString() }
+                        : entry,
+                    ),
+                  },
+                  asset.id,
+                  {
+                    entity: "promotion",
+                    entityId: promotion.id,
+                    label: promotion.name,
+                    route: "/admin/promotions",
+                  },
+                ),
+              )
             }
           />
         ))}
@@ -944,256 +1200,693 @@ export function PromotionsView() {
 
 function PromotionEditor({
   promotion,
+  canEdit,
+  canPublish,
   onUpdate,
+  onAssignImage,
 }: {
   promotion: Promotion;
+  canEdit: boolean;
+  canPublish: boolean;
   onUpdate: (promotion: Promotion) => void;
+  onAssignImage: (asset: MediaAsset) => void;
 }) {
   return (
-    <Surface>
-      <PanelHeader
-        title={promotion.name}
-        meta={`${promotion.placement} · prioriteit ${promotion.priority}`}
-        action={<StatusBadge status={promotion.status} />}
-      />
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div>
-          <FieldLabel>Naam</FieldLabel>
-          <Input value={promotion.name} onChange={(event) => onUpdate({ ...promotion, name: event.target.value, updatedAt: new Date().toISOString() })} />
-        </div>
-        <div>
-          <FieldLabel>Placement</FieldLabel>
-          <Select value={promotion.placement} onChange={(event) => onUpdate({ ...promotion, placement: event.target.value as Promotion["placement"], updatedAt: new Date().toISOString() })}>
-            <option value="global-strip">global-strip</option>
-            <option value="home-hero">home-hero</option>
-            <option value="menu-page">menu-page</option>
-            <option value="locations-page">locations-page</option>
-            <option value="jobs-page">jobs-page</option>
-            <option value="groups-page">groups-page</option>
-          </Select>
-        </div>
-        <div>
-          <FieldLabel>Status</FieldLabel>
-          <Select value={promotion.status} onChange={(event) => onUpdate({ ...promotion, status: event.target.value as Promotion["status"], updatedAt: new Date().toISOString() })}>
-            <option value="draft">draft</option>
-            <option value="active">active</option>
-            <option value="scheduled">scheduled</option>
-            <option value="expired">expired</option>
-          </Select>
-        </div>
-      </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-3">
-        {LOCALES.map((locale) => (
-          <div key={locale} className="rounded-[0.95rem] border border-pp-olive/9 bg-white/80 p-4">
-            <FieldLabel>Copy {locale.toUpperCase()}</FieldLabel>
-            <Textarea
-              value={promotion.copy[locale]}
-              onChange={(event) =>
-                onUpdate({
-                  ...promotion,
-                  copy: { ...promotion.copy, [locale]: event.target.value },
-                  updatedAt: new Date().toISOString(),
-                })
-              }
-            />
+    <FlatSection>
+      <div className="border-b border-pp-olive/10 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-display text-2xl text-pp-olive">{promotion.name}</p>
+            <p className="mt-1 text-sm text-pp-black/58">
+              {promotion.placement} · prioriteit {promotion.priority}
+            </p>
           </div>
-        ))}
+          <StatusBadge status={promotion.status} />
+        </div>
       </div>
-    </Surface>
+      <div className="grid gap-4 px-5 py-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div>
+              <FieldLabel>Naam</FieldLabel>
+              <Input disabled={!canEdit} value={promotion.name} onChange={(event) => onUpdate({ ...promotion, name: event.target.value, updatedAt: new Date().toISOString() })} />
+            </div>
+            <div>
+              <FieldLabel>Placement</FieldLabel>
+              <Select disabled={!canEdit} value={promotion.placement} onChange={(event) => onUpdate({ ...promotion, placement: event.target.value as Promotion["placement"], updatedAt: new Date().toISOString() })}>
+                <option value="global-strip">global-strip</option>
+                <option value="home-hero">home-hero</option>
+                <option value="menu-page">menu-page</option>
+                <option value="locations-page">locations-page</option>
+                <option value="jobs-page">jobs-page</option>
+                <option value="groups-page">groups-page</option>
+              </Select>
+            </div>
+            <div>
+              <FieldLabel>Status</FieldLabel>
+              <Select disabled={!canPublish} value={promotion.status} onChange={(event) => onUpdate({ ...promotion, status: event.target.value as Promotion["status"], updatedAt: new Date().toISOString() })}>
+                <option value="draft">draft</option>
+                <option value="active">active</option>
+                <option value="scheduled">scheduled</option>
+                <option value="expired">expired</option>
+              </Select>
+            </div>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div>
+              <FieldLabel>Start</FieldLabel>
+              <Input disabled={!canPublish} type="datetime-local" value={promotion.startAt.slice(0, 16)} onChange={(event) => onUpdate({ ...promotion, startAt: new Date(event.target.value).toISOString(), updatedAt: new Date().toISOString() })} />
+            </div>
+            <div>
+              <FieldLabel>Einde</FieldLabel>
+              <Input disabled={!canPublish} type="datetime-local" value={promotion.endAt.slice(0, 16)} onChange={(event) => onUpdate({ ...promotion, endAt: new Date(event.target.value).toISOString(), updatedAt: new Date().toISOString() })} />
+            </div>
+            <div>
+              <FieldLabel>Prioriteit</FieldLabel>
+              <Input disabled={!canPublish} type="number" min="1" value={promotion.priority} onChange={(event) => onUpdate({ ...promotion, priority: Number(event.target.value) || 1, updatedAt: new Date().toISOString() })} />
+            </div>
+          </div>
+          <div className="grid gap-4 xl:grid-cols-3">
+            {LOCALES.map((locale) => (
+              <div key={locale} className="border border-pp-olive/10 bg-white px-4 py-4">
+                <FieldLabel>Copy {locale.toUpperCase()}</FieldLabel>
+                <Textarea
+                  disabled={!canEdit}
+                  value={promotion.copy[locale]}
+                  onChange={(event) =>
+                    onUpdate({
+                      ...promotion,
+                      copy: { ...promotion.copy, [locale]: event.target.value },
+                      updatedAt: new Date().toISOString(),
+                    })
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-4 border-l border-pp-olive/10 pl-0 lg:pl-5">
+          <MediaAssetPickerField
+            label="Campagnebeeld"
+            valueSrc={promotion.imageSrc}
+            disabled={!canEdit}
+            onSelect={onAssignImage}
+          />
+          <div className="grid gap-4 lg:grid-cols-1">
+            <div>
+              <FieldLabel>CTA label</FieldLabel>
+              <Input disabled={!canEdit} value={promotion.ctaLabel} onChange={(event) => onUpdate({ ...promotion, ctaLabel: event.target.value, updatedAt: new Date().toISOString() })} />
+            </div>
+            <div>
+              <FieldLabel>CTA href</FieldLabel>
+              <Input disabled={!canEdit} value={promotion.ctaHref} onChange={(event) => onUpdate({ ...promotion, ctaHref: event.target.value, updatedAt: new Date().toISOString() })} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </FlatSection>
   );
-}
-
-type MediaEntry = {
-  id: string;
-  scope: string;
-  src: string;
-  folder: string;
-  type: "image" | "video" | "document";
-  usageLabel: string;
-};
-
-function inferMediaType(src: string): MediaEntry["type"] {
-  const clean = src.toLowerCase();
-  if (clean.endsWith(".mp4") || clean.endsWith(".mov") || clean.endsWith(".webm")) return "video";
-  if (clean.endsWith(".pdf")) return "document";
-  return "image";
-}
-
-function inferFolder(src: string) {
-  const clean = src.startsWith("/") ? src.slice(1) : src;
-  const [root, second] = clean.split("/");
-  return second ? `${root}/${second}` : root;
 }
 
 export function MediaView() {
-  const { state } = useMarketingAdmin();
-  const [selectedFolder, setSelectedFolder] = useState("all");
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | MediaAsset["type"]>("all");
+  const [newFolderName, setNewFolderName] = useState("");
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
+  const [bulkTargetFolderId, setBulkTargetFolderId] = useState<string>("all");
+  const [dropFolderId, setDropFolderId] = useState<string | null>(null);
 
-  const media = useMemo<MediaEntry[]>(() => {
-    const items = [
-      ...state.locations.map((location) => ({
-        id: `location-${location.id}`,
-        scope: `Locatie · ${location.city}`,
-        src: location.imageSrc,
-        usageLabel: "Location hero",
-      })),
-      ...state.menuSections.map((section) => ({
-        id: `menu-${section.id}`,
-        scope: `Menu · ${section.label}`,
-        src: section.src,
-        usageLabel: "Menu slide",
-      })),
-      ...state.groups.map((group) => ({
-        id: `group-${group.id}`,
-        scope: `Groepen · ${group.label}`,
-        src: group.src,
-        usageLabel: "Group menu",
-      })),
-      ...state.promotions
-        .filter((promotion) => promotion.imageSrc)
-        .map((promotion) => ({
-          id: `promo-${promotion.id}`,
-          scope: `Promotie · ${promotion.name}`,
-          src: promotion.imageSrc ?? "",
-          usageLabel: "Campaign asset",
-        })),
-    ];
+  const folderMap = useMemo(
+    () => new Map(state.mediaFolders.map((folder) => [folder.id, folder])),
+    [state.mediaFolders],
+  );
+  const folderChildren = useMemo(() => {
+    const map = new Map<string | null, MediaFolder[]>();
+    state.mediaFolders.forEach((folder) => {
+      const bucket = map.get(folder.parentId) ?? [];
+      bucket.push(folder);
+      map.set(folder.parentId, bucket);
+    });
+    return map;
+  }, [state.mediaFolders]);
+  const media = useMemo(() => state.mediaAssets, [state.mediaAssets]);
+  const activeFolderIds = useMemo(
+    () =>
+      selectedFolderId === "all"
+        ? new Set(state.mediaFolders.map((folder) => folder.id))
+        : getFolderDescendantIds(state.mediaFolders, selectedFolderId),
+    [selectedFolderId, state.mediaFolders],
+  );
 
-    return items
-      .filter((item) => item.src)
-      .map((item) => ({
-        ...item,
-        folder: inferFolder(item.src),
-        type: inferMediaType(item.src),
-      }));
-  }, [state]);
+  const filteredMedia = useMemo(() => {
+    const needle = searchQuery.trim().toLowerCase();
+    return media.filter((item) => {
+      const inFolder = selectedFolderId === "all" || activeFolderIds.has(item.folderId);
+      const typeMatches = typeFilter === "all" || item.type === typeFilter;
+      const textMatches =
+        !needle ||
+        [
+          item.name,
+          item.altText,
+          item.mimeType,
+          item.extension,
+          ...item.tags,
+          ...item.usages.map((usage) => `${usage.entity} ${usage.label}`),
+          folderMap.get(item.folderId)?.path ?? "",
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(needle);
+      return inFolder && typeMatches && textMatches;
+    });
+  }, [activeFolderIds, folderMap, media, searchQuery, selectedFolderId, typeFilter]);
 
-  const folders = useMemo(
-    () => ["all", ...Array.from(new Set(media.map((item) => item.folder))).sort()],
+  const selectedAsset =
+    filteredMedia.find((item) => item.id === selectedId) ??
+    filteredMedia[0] ??
+    media[0] ??
+    null;
+
+  const recentAssets = useMemo(
+    () =>
+      [...media]
+        .sort((left, right) => new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime())
+        .slice(0, 5),
     [media],
   );
 
-  const visibleMedia = useMemo(
-    () => media.filter((item) => selectedFolder === "all" || item.folder === selectedFolder),
-    [media, selectedFolder],
+  const unusedAssets = useMemo(
+    () => media.filter((item) => item.usages.length === 0).slice(0, 6),
+    [media],
   );
 
-  const selectedAsset =
-    visibleMedia.find((item) => item.id === selectedId) ??
-    visibleMedia[0] ??
-    null;
+  const selectedAssets = useMemo(
+    () => media.filter((item) => selectedAssetIds.includes(item.id)),
+    [media, selectedAssetIds],
+  );
+
+  async function handleFiles(files: FileList | null, folderId: string) {
+    if (!files || !permissions.canManageMedia) return;
+
+    const entries = Array.from(files).slice(0, 12);
+    const uploadedAt = new Date().toISOString();
+    const nextAssets = await Promise.all(
+      entries.map(
+        (file) =>
+          new Promise<MediaAsset>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = typeof reader.result === "string" ? reader.result : "";
+              const type = file.type.includes("svg")
+                ? "svg"
+                : file.type.startsWith("video/")
+                  ? "video"
+                  : file.type === "application/pdf"
+                    ? "document"
+                    : "image";
+
+              resolve({
+                id: `asset-upload-${Date.now()}-${file.name}`,
+                name: file.name,
+                folderId,
+                src: result,
+                previewSrc: result,
+                type,
+                extension: file.name.split(".").pop() ?? "",
+                mimeType: file.type || "application/octet-stream",
+                sizeBytes: file.size,
+                altText: file.name.replace(/\.[^/.]+$/, ""),
+                tags: ["upload", folderMap.get(folderId)?.name ?? "media"],
+                uploadedAt,
+                updatedAt: uploadedAt,
+                uploadedBy: currentUser.id,
+                usages: [],
+              });
+            };
+            reader.readAsDataURL(file);
+          }),
+      ),
+    );
+
+    setState((current) => ({
+      ...current,
+      mediaAssets: [...nextAssets, ...current.mediaAssets],
+    }));
+    addAuditEntry({
+      action: "upload",
+      entity: "mediaAsset",
+      entityId: nextAssets.map((item) => item.id).join(","),
+      details: `${nextAssets.length} asset(s) geupload naar ${folderMap.get(folderId)?.path ?? "folder"}.`,
+    });
+    setSelectedFolderId(folderId);
+    setSelectedId(nextAssets[0]?.id ?? null);
+  }
+
+  function handleCreateFolder() {
+    if (!permissions.canManageMedia || !newFolderName.trim()) return;
+    const parentId = selectedFolderId === "all" ? null : selectedFolderId;
+    setState((current) => createFolder(current, newFolderName, parentId));
+    addAuditEntry({
+      action: "create",
+      entity: "mediaFolder",
+      entityId: slugifyFolderName(newFolderName),
+      details: `Folder ${newFolderName.trim()} aangemaakt onder ${parentId ? folderMap.get(parentId)?.path ?? parentId : "root"}.`,
+    });
+    setNewFolderName("");
+  }
+
+  function moveAsset(assetId: string, folderId: string) {
+    if (!permissions.canManageMedia) return;
+    setState((current) => ({
+      ...current,
+      mediaAssets: current.mediaAssets.map((asset) =>
+        asset.id === assetId
+          ? { ...asset, folderId, updatedAt: new Date().toISOString() }
+          : asset,
+      ),
+    }));
+    addAuditEntry({
+      action: "move",
+      entity: "mediaAsset",
+      entityId: assetId,
+      details: `Asset verplaatst naar ${folderMap.get(folderId)?.path ?? folderId}.`,
+    });
+  }
+
+  function moveSelectedAssets() {
+    if (!permissions.canManageMedia || !selectedAssetIds.length || bulkTargetFolderId === "all") {
+      return;
+    }
+    setState((current) => ({
+      ...current,
+      mediaAssets: current.mediaAssets.map((asset) =>
+        selectedAssetIds.includes(asset.id)
+          ? { ...asset, folderId: bulkTargetFolderId, updatedAt: new Date().toISOString() }
+          : asset,
+      ),
+    }));
+    addAuditEntry({
+      action: "bulk-move",
+      entity: "mediaAsset",
+      entityId: selectedAssetIds.join(","),
+      details: `${selectedAssetIds.length} asset(s) verplaatst naar ${folderMap.get(bulkTargetFolderId)?.path ?? bulkTargetFolderId}.`,
+    });
+    setSelectedAssetIds([]);
+  }
+
+  function deleteSelectedAssets() {
+    if (!permissions.canManageMedia || !selectedAssetIds.length) return;
+    const deletable = selectedAssets.filter((asset) => asset.usages.length === 0);
+    if (!deletable.length) return;
+    setState((current) => deleteMediaAssets(current, deletable.map((asset) => asset.id)));
+    addAuditEntry({
+      action: "bulk-delete",
+      entity: "mediaAsset",
+      entityId: deletable.map((asset) => asset.id).join(","),
+      details: `${deletable.length} ongebruikte asset(s) verwijderd uit de media library.`,
+    });
+    setSelectedAssetIds((current) => current.filter((id) => !deletable.some((asset) => asset.id === id)));
+  }
+
+  function moveTreeFolder(folderId: string, nextParentId: string | null) {
+    if (!permissions.canManageMedia) return;
+    setState((current) => moveFolder(current, folderId, nextParentId));
+    addAuditEntry({
+      action: "move",
+      entity: "mediaFolder",
+      entityId: folderId,
+      details: `Map verplaatst naar ${nextParentId ? folderMap.get(nextParentId)?.path ?? nextParentId : "root"}.`,
+    });
+  }
+
+  function renderFolderTree(parentId: string | null, depth = 0): React.ReactNode {
+    const children = folderChildren.get(parentId) ?? [];
+    return children.map((folder) => {
+      const active = folder.id === selectedFolderId;
+      const count = media.filter((item) => getFolderDescendantIds(state.mediaFolders, folder.id).has(item.folderId)).length;
+
+      return (
+        <div key={folder.id} className="space-y-1">
+          <button
+            type="button"
+            draggable={permissions.canManageMedia}
+            onDragStart={(event) => event.dataTransfer.setData("text/media-folder-id", folder.id)}
+            onClick={() => setSelectedFolderId(folder.id)}
+            onDragOver={(event) => {
+              if (!permissions.canManageMedia) return;
+              event.preventDefault();
+              setDropFolderId(folder.id);
+            }}
+            onDragLeave={() => setDropFolderId((current) => (current === folder.id ? null : current))}
+            onDrop={(event) => {
+              if (!permissions.canManageMedia) return;
+              event.preventDefault();
+              const assetId = event.dataTransfer.getData("text/media-asset-id");
+              const draggedFolderId = event.dataTransfer.getData("text/media-folder-id");
+              if (assetId) moveAsset(assetId, folder.id);
+              if (draggedFolderId && draggedFolderId !== folder.id) moveTreeFolder(draggedFolderId, folder.id);
+              setDropFolderId(null);
+            }}
+            className={`flex w-full items-center justify-between border px-3 py-2 text-left transition-colors ${
+              active
+                ? "border-pp-olive bg-pp-olive text-pp-creme"
+                : dropFolderId === folder.id
+                  ? "border-pp-lollypop bg-pp-lollypop/[0.06] text-pp-black"
+                  : "border-pp-olive/10 bg-white text-pp-black hover:border-pp-lollypop/40"
+            }`}
+            style={{ paddingLeft: `${12 + depth * 16}px` }}
+          >
+            <span className="truncate text-sm">{folder.name}</span>
+            <span className={`px-2 py-0.5 text-[0.7rem] ${active ? "bg-pp-creme/18" : "bg-pp-olive/7 text-pp-olive/55"}`}>
+              {count}
+            </span>
+          </button>
+          {renderFolderTree(folder.id, depth + 1)}
+        </div>
+      );
+    });
+  }
 
   return (
     <>
       <SectionHeader
         title="Media Library"
-        intro="Een media-overzicht dat meer aanvoelt als een echte bibliotheek: mapnavigatie links, previews in het midden en usage context rechts."
+        intro="Een lokale media workspace met echte mappenstructuur, bulkacties, previews en usage-tracking. Meer file manager, minder losse cards."
+        actions={
+          <label className="border px-4 py-2 font-accent uppercase tracking-[0.18em] text-[0.62rem] text-pp-olive transition-colors hover:border-pp-lollypop hover:text-pp-lollypop">
+            Upload assets
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              disabled={!permissions.canManageMedia}
+              accept="image/*,video/*,.pdf,.svg"
+              onChange={(event) => {
+                void handleFiles(
+                  event.target.files,
+                  selectedFolderId === "all" ? state.mediaFolders[0]?.id ?? "folder-root-images" : selectedFolderId,
+                );
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+        }
       />
-      <div className="grid gap-6 xl:grid-cols-[220px_minmax(0,1fr)_320px]">
-        <Surface className="p-4">
-          <PanelHeader
-            title="Folders"
-            meta={`${media.length} assets in gebruik`}
-          />
+      {!permissions.canManageMedia ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
+      <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)_360px]">
+        <FlatSection className="p-4">
+          <PanelHeader title="Folders" meta={`${state.mediaFolders.length} mappen`} />
+          <form
+            className="mb-4 space-y-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleCreateFolder();
+            }}
+          >
+            <FieldLabel>Nieuwe map</FieldLabel>
+            <Input
+              value={newFolderName}
+              onChange={(event) => setNewFolderName(event.target.value)}
+              placeholder={selectedFolderId === "all" ? "Bijv. summer-2026" : `Submap in ${folderMap.get(selectedFolderId)?.name ?? "map"}`}
+              disabled={!permissions.canManageMedia}
+            />
+            <ActionButton type="submit" tone="secondary" disabled={!permissions.canManageMedia || !newFolderName.trim()}>
+              Map aanmaken
+            </ActionButton>
+          </form>
           <div className="space-y-2">
-            {folders.map((folder) => {
-              const count = folder === "all"
-                ? media.length
-                : media.filter((item) => item.folder === folder).length;
-              const active = folder === selectedFolder;
-              return (
-                <button
-                  key={folder}
-                  type="button"
-                  onClick={() => setSelectedFolder(folder)}
-                  className={`flex w-full items-center justify-between rounded-[0.9rem] border px-3 py-2 text-left transition-colors ${
-                    active
-                      ? "border-pp-olive bg-pp-olive text-pp-creme"
-                      : "border-pp-olive/10 bg-white text-pp-black hover:border-pp-lollypop/40"
-                  }`}
-                >
-                  <span className="truncate text-sm">{folder === "all" ? "All assets" : folder}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[0.7rem] ${active ? "bg-pp-creme/18" : "bg-pp-olive/7 text-pp-olive/55"}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              onClick={() => setSelectedFolderId("all")}
+              onDragOver={(event) => {
+                if (!permissions.canManageMedia) return;
+                event.preventDefault();
+                setDropFolderId("all");
+              }}
+              onDrop={(event) => {
+                if (!permissions.canManageMedia) return;
+                event.preventDefault();
+                const draggedFolderId = event.dataTransfer.getData("text/media-folder-id");
+                if (draggedFolderId) moveTreeFolder(draggedFolderId, null);
+                setDropFolderId(null);
+              }}
+              className={`flex w-full items-center justify-between border px-3 py-2 text-left transition-colors ${
+                selectedFolderId === "all"
+                  ? "border-pp-olive bg-pp-olive text-pp-creme"
+                  : "border-pp-olive/10 bg-white text-pp-black hover:border-pp-lollypop/40"
+              }`}
+            >
+              <span className="truncate text-sm">All assets</span>
+              <span className="bg-pp-olive/7 px-2 py-0.5 text-[0.7rem] text-current">{media.length}</span>
+            </button>
+            {renderFolderTree(null)}
           </div>
-        </Surface>
+        </FlatSection>
 
-        <Surface className="p-4">
-          <PanelHeader
-            title="Preview grid"
-            meta={selectedFolder === "all" ? "Alle gebruikte assets" : `Map: ${selectedFolder}`}
-          />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleMedia.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setSelectedId(item.id)}
-                className={`overflow-hidden rounded-[1rem] border text-left transition-colors ${
-                  selectedAsset?.id === item.id
-                    ? "border-pp-lollypop bg-pp-lollypop/[0.06]"
-                    : "border-pp-olive/10 bg-white hover:border-pp-lollypop/35"
-                }`}
-              >
-                <div className="relative aspect-[4/3] bg-[#f3ecd8]">
-                  {item.type === "image" ? (
-                    <Image src={item.src} alt={item.scope} fill className="object-cover" sizes="(max-width: 1280px) 50vw, 20vw" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-pp-olive/55">
-                      {item.type.toUpperCase()}
-                    </div>
-                  )}
+        <FlatSection className="p-4">
+          <PanelHeader title="Library workspace" meta={`${filteredMedia.length} assets zichtbaar`} />
+          <div className="mb-4 grid gap-3 xl:grid-cols-[1fr_180px_200px]">
+            <Input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Zoek op naam, alt text, tags, usage of mime type" />
+            <Select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as "all" | MediaAsset["type"])}>
+              <option value="all">Alle types</option>
+              <option value="image">Images</option>
+              <option value="svg">SVG</option>
+              <option value="video">Video</option>
+              <option value="document">Document</option>
+            </Select>
+            <Select value={bulkTargetFolderId} onChange={(event) => setBulkTargetFolderId(event.target.value)}>
+              <option value="all">Bulk move naar...</option>
+              {state.mediaFolders.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.path}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-2 border border-pp-olive/10 bg-white px-3 py-3 text-sm text-pp-black/65">
+            <span>{selectedAssetIds.length} geselecteerd</span>
+            <ActionButton tone="secondary" onClick={moveSelectedAssets} disabled={!permissions.canManageMedia || !selectedAssetIds.length || bulkTargetFolderId === "all"}>
+              Bulk move
+            </ActionButton>
+            <ActionButton tone="secondary" onClick={deleteSelectedAssets} disabled={!permissions.canManageMedia || !selectedAssets.some((asset) => asset.usages.length === 0)}>
+              Delete unused
+            </ActionButton>
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedAssetIds(
+                  selectedAssetIds.length === filteredMedia.length ? [] : filteredMedia.map((item) => item.id),
+                )
+              }
+              className="ml-auto border border-pp-olive/12 px-3 py-2 font-accent text-[0.58rem] uppercase tracking-[0.16em] text-pp-olive"
+            >
+              {selectedAssetIds.length === filteredMedia.length ? "Clear selection" : "Select visible"}
+            </button>
+          </div>
+          <div
+            className={`mb-4 border border-dashed px-4 py-5 text-center ${
+              permissions.canManageMedia ? "border-pp-olive/18 bg-white/70" : "border-pp-olive/10 bg-slate-50"
+            }`}
+            onDragOver={(event) => {
+              if (!permissions.canManageMedia) return;
+              event.preventDefault();
+            }}
+            onDrop={(event) => {
+              if (!permissions.canManageMedia) return;
+              event.preventDefault();
+              void handleFiles(
+                event.dataTransfer.files,
+                selectedFolderId === "all" ? state.mediaFolders[0]?.id ?? "folder-root-images" : selectedFolderId,
+              );
+            }}
+          >
+            <p className="text-sm text-pp-black/64">
+              {permissions.canManageMedia
+                ? "Sleep bestanden hierheen om ze meteen in de geselecteerde map te uploaden."
+                : "Viewer role: uploads en mutaties zijn uitgeschakeld."}
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredMedia.map((item) => (
+              <div key={item.id} className={`border bg-white transition-colors ${selectedAsset?.id === item.id ? "border-pp-lollypop" : "border-pp-olive/10 hover:border-pp-lollypop/35"}`}>
+                <div className="flex items-center justify-between border-b border-pp-olive/10 px-3 py-2">
+                  <label className="flex items-center gap-2 text-xs text-pp-black/55">
+                    <input
+                      type="checkbox"
+                      checked={selectedAssetIds.includes(item.id)}
+                      onChange={(event) =>
+                        setSelectedAssetIds((current) =>
+                          event.target.checked ? [...current, item.id] : current.filter((id) => id !== item.id),
+                        )
+                      }
+                    />
+                    select
+                  </label>
+                  <span className="text-xs text-pp-black/45">{mediaTypeLabel(item.type)}</span>
                 </div>
-                <div className="space-y-1 px-3 py-3">
-                  <p className="font-accent uppercase text-[0.52rem] tracking-[0.16em] text-pp-olive/45">
-                    {item.usageLabel}
-                  </p>
-                  <p className="line-clamp-2 text-sm text-pp-black/72">{item.scope}</p>
-                </div>
-              </button>
+                <button
+                  type="button"
+                  draggable={permissions.canManageMedia}
+                  onDragStart={(event) => event.dataTransfer.setData("text/media-asset-id", item.id)}
+                  onClick={() => setSelectedId(item.id)}
+                  className="block w-full text-left"
+                >
+                  <div className="relative aspect-[4/3] bg-[#f3ecd8]">
+                    {item.type === "image" || item.type === "svg" ? (
+                      <Image src={item.previewSrc} alt={item.altText || item.name} fill className="object-cover" sizes="(max-width: 1280px) 50vw, 20vw" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-pp-olive/55">
+                        {item.type.toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1 px-3 py-3">
+                    <p className="font-accent uppercase text-[0.52rem] tracking-[0.16em] text-pp-olive/45">
+                      {folderMap.get(item.folderId)?.path ?? "folder"}
+                    </p>
+                    <p className="line-clamp-2 text-sm text-pp-black/72">{item.name}</p>
+                    <p className="text-xs text-pp-black/45">{item.usages.length} usage(s)</p>
+                  </div>
+                </button>
+              </div>
             ))}
           </div>
-        </Surface>
+        </FlatSection>
 
-        <Surface className="p-4">
-          <PanelHeader
-            title="Asset detail"
-            meta={selectedAsset ? "Gebruik, map en bronpad" : "Selecteer een asset"}
-          />
+        <FlatSection className="p-4">
+          <PanelHeader title="Inspector" meta={selectedAsset ? "Metadata, usages en snelle bewerkingen" : "Selecteer een asset"} />
           {selectedAsset ? (
             <div className="space-y-4">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1rem] border border-pp-olive/10 bg-[#f3ecd8]">
-                {selectedAsset.type === "image" ? (
-                  <Image src={selectedAsset.src} alt={selectedAsset.scope} fill className="object-cover" sizes="320px" />
+              <div className="relative aspect-[4/3] overflow-hidden border border-pp-olive/10 bg-[#f3ecd8]">
+                {selectedAsset.type === "image" || selectedAsset.type === "svg" ? (
+                  <Image src={selectedAsset.previewSrc} alt={selectedAsset.altText || selectedAsset.name} fill className="object-cover" sizes="360px" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-pp-olive/55">
-                    {selectedAsset.type.toUpperCase()}
+                    {mediaTypeLabel(selectedAsset.type)}
                   </div>
                 )}
               </div>
+              <div>
+                <FieldLabel>Bestandsnaam</FieldLabel>
+                <Input
+                  value={selectedAsset.name}
+                  disabled={!permissions.canManageMedia}
+                  onChange={(event) =>
+                    setState((current) => ({
+                      ...current,
+                      mediaAssets: current.mediaAssets.map((asset) =>
+                        asset.id === selectedAsset.id
+                          ? { ...asset, name: event.target.value, updatedAt: new Date().toISOString() }
+                          : asset,
+                      ),
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <FieldLabel>Alt text</FieldLabel>
+                <Textarea
+                  value={selectedAsset.altText}
+                  disabled={!permissions.canManageMedia}
+                  onChange={(event) =>
+                    setState((current) => ({
+                      ...current,
+                      mediaAssets: current.mediaAssets.map((asset) =>
+                        asset.id === selectedAsset.id
+                          ? { ...asset, altText: event.target.value, updatedAt: new Date().toISOString() }
+                          : asset,
+                      ),
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <FieldLabel>Map</FieldLabel>
+                <Select value={selectedAsset.folderId} disabled={!permissions.canManageMedia} onChange={(event) => moveAsset(selectedAsset.id, event.target.value)}>
+                  {state.mediaFolders.map((folder) => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.path}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               {copyRows([
-                { label: "Usage", value: selectedAsset.scope },
-                { label: "Folder", value: selectedAsset.folder },
-                { label: "Type", value: selectedAsset.type },
-                { label: "Source path", value: selectedAsset.src },
+                { label: "Type", value: mediaTypeLabel(selectedAsset.type) },
+                { label: "Folder", value: folderMap.get(selectedAsset.folderId)?.path ?? selectedAsset.folderId },
+                { label: "File size", value: formatBytes(selectedAsset.sizeBytes) },
+                { label: "MIME", value: selectedAsset.mimeType },
+                { label: "Uploaded by", value: state.users.find((user) => user.id === selectedAsset.uploadedBy)?.name ?? selectedAsset.uploadedBy },
+                { label: "Source path", value: selectedAsset.src.slice(0, 80) + (selectedAsset.src.length > 80 ? "..." : "") },
               ])}
+              <div>
+                <PanelHeader title="Recent toegevoegd" meta="Nieuwste uploads en seeded assets." />
+                <div className="space-y-2">
+                  {recentAssets.map((asset) => (
+                    <button key={asset.id} type="button" onClick={() => setSelectedId(asset.id)} className="flex w-full items-center justify-between border border-pp-olive/10 bg-white px-3 py-3 text-left hover:border-pp-lollypop/35">
+                      <div>
+                        <p className="text-sm text-pp-black/74">{asset.name}</p>
+                        <p className="mt-1 text-xs text-pp-black/45">{folderMap.get(asset.folderId)?.path ?? asset.folderId}</p>
+                      </div>
+                      <span className="text-xs text-pp-black/45">{formatBytes(asset.sizeBytes)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <PanelHeader title="Unused assets" meta="Assets zonder usage-koppeling." />
+                {unusedAssets.length ? (
+                  <div className="space-y-2">
+                    {unusedAssets.map((asset) => (
+                      <button key={asset.id} type="button" onClick={() => setSelectedId(asset.id)} className="flex w-full items-center justify-between border border-pp-olive/10 bg-white px-3 py-3 text-left hover:border-pp-lollypop/35">
+                        <div>
+                          <p className="text-sm text-pp-black/74">{asset.name}</p>
+                          <p className="mt-1 text-xs text-pp-black/45">{folderMap.get(asset.folderId)?.path ?? asset.folderId}</p>
+                        </div>
+                        <span className="font-accent text-[0.54rem] uppercase tracking-[0.16em] text-pp-christmas">unused</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-pp-black/60">Alles heeft momenteel een usage-koppeling.</p>
+                )}
+              </div>
+              <div>
+                <PanelHeader title="Usage" meta={`${selectedAsset.usages.length} references`} />
+                {selectedAsset.usages.length ? (
+                  <div className="space-y-2">
+                    {selectedAsset.usages.map((usage) => (
+                      <div key={`${usage.entity}-${usage.entityId}`} className="border border-pp-olive/8 bg-white/75 px-3 py-3">
+                        <p className="font-accent uppercase text-[0.52rem] tracking-[0.16em] text-pp-olive/45">
+                          {usage.entity}
+                        </p>
+                        <p className="mt-1 text-sm text-pp-black/72">{usage.label}</p>
+                        {usage.route ? <p className="mt-1 text-xs text-pp-black/45">{usage.route}</p> : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-pp-black/58">Nog niet gekoppeld aan content.</p>
+                )}
+              </div>
             </div>
           ) : (
             <p className="text-sm text-pp-black/60">Geen assets gevonden in deze map.</p>
           )}
-        </Surface>
+        </FlatSection>
       </div>
     </>
   );
 }
 
 export function SettingsView() {
-  const { state, setState, addAuditEntry } = useMarketingAdmin();
+  const { state, setState, addAuditEntry, permissions, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -1201,6 +1894,11 @@ export function SettingsView() {
         title="Settings"
         intro="Globale merk- en reserveerinstellingen die de site als geheel beïnvloeden."
       />
+      {!permissions.canEdit ? (
+        <div className="mb-6">
+          <PermissionNotice role={currentUser.role} mode="view" />
+        </div>
+      ) : null}
       <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
         <Surface>
           <PanelHeader
@@ -1212,6 +1910,7 @@ export function SettingsView() {
               <FieldLabel>Brand tagline</FieldLabel>
               <Input
                 value={state.globalSettings.brandTagline}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "globalSettings", "brandTagline", (current) => ({
                     ...current,
@@ -1227,6 +1926,7 @@ export function SettingsView() {
               <FieldLabel>Reserve route</FieldLabel>
               <Input
                 value={state.globalSettings.reserveUrl}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "globalSettings", "reserveUrl", (current) => ({
                     ...current,
@@ -1242,6 +1942,7 @@ export function SettingsView() {
               <FieldLabel>Footer copy</FieldLabel>
               <Textarea
                 value={state.globalSettings.footerCopy}
+                disabled={!permissions.canEdit}
                 onChange={(event) =>
                   updateWithAudit(setState, addAuditEntry, "update", "globalSettings", "footerCopy", (current) => ({
                     ...current,
@@ -1274,7 +1975,7 @@ export function SettingsView() {
 }
 
 export function AuditView() {
-  const { state } = useMarketingAdmin();
+  const { state, currentUser } = useMarketingAdmin();
 
   return (
     <>
@@ -1282,6 +1983,9 @@ export function AuditView() {
         title="Audit"
         intro="Chronologische view van lokale wijzigingen, gegroepeerd als een professionele activity feed in plaats van ruwe logregels."
       />
+      <div className="mb-6">
+        <PermissionNotice role={currentUser.role} mode="view" />
+      </div>
       <Surface>
         <PanelHeader
           title="Activity feed"

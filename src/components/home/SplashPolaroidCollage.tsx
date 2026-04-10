@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { splashPolaroidItems } from "@/content/splashPolaroids";
 import { PolaroidFrame } from "@/components/home/PolaroidFrame";
 
@@ -8,7 +9,10 @@ type Props = { reduceMotion: boolean | null };
 
 export function SplashPolaroidCollage({ reduceMotion }: Props) {
   const prefersReduced = useReducedMotion();
-  const still = !!(reduceMotion || prefersReduced);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  /** Match SSR: media query / hook can differ on first client paint vs server. */
+  const still = mounted && !!(reduceMotion || prefersReduced);
 
   return (
     <div

@@ -109,7 +109,7 @@ function AdminIcon({
 function Frame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { resetState } = useMarketingAdmin();
+  const { resetState, state, currentUser, setCurrentUserId } = useMarketingAdmin();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -251,6 +251,26 @@ function Frame({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <label className="hidden lg:block">
+                <span className="sr-only">Actieve admin gebruiker</span>
+                <select
+                  value={currentUser.id}
+                  onChange={(event) => setCurrentUserId(event.target.value)}
+                  className="border border-pp-olive/16 bg-white px-3 py-2 text-sm text-pp-olive outline-none"
+                >
+                  {state.users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name} · {user.role}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="hidden min-w-[8rem] border border-pp-olive/12 bg-white px-3 py-2 lg:block">
+                <p className="font-accent text-[0.5rem] uppercase tracking-[0.16em] text-pp-olive/45">
+                  Active role
+                </p>
+                <p className="mt-1 text-sm text-pp-olive">{currentUser.role}</p>
+              </div>
               <button
                 type="button"
                 onClick={handleLogout}

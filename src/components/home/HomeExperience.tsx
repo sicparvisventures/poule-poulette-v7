@@ -103,23 +103,24 @@ function SplashSlideshow({ onComplete }: SlideshowProps) {
 
 export function HomeExperience() {
   const reduceMotion = useReducedMotion();
+  const [clientReady, setClientReady] = useState(false);
   const vw = useViewportWidth(0);
   const splashTitleId = useId();
   const homeJourneyLabelId = useId();
   const mainRef = useRef<HTMLElement>(null);
   const desktopHorizontalJourney = !reduceMotion && vw >= 768;
   const chickenDismissRef = useRef<number | null>(null);
-  const [splashActive, setSplashActive] = useState(() => {
-    if (typeof window === "undefined") {
-      return true;
-    }
-    try {
-      return !reduceMotion && sessionStorage.getItem(STORAGE_KEY) !== "1";
-    } catch {
-      return !reduceMotion;
-    }
-  });
-  const splashOpen = splashActive && !reduceMotion;
+  /** Must match SSR (always show splash until mount) so sessionStorage does not cause hydration mismatch. */
+  const [splashActive, setSplashActive] = useState(true);
+  /**
+   * Framer’s useReducedMotion() is typically false on SSR but can be true on the first client paint,
+   * which would hide the splash on the client only → hydration mismatch. Ignore reduced-motion for
+   * splash visibility until after mount; then respect the real preference.
+   */
+  const splashOpen =
+    splashActive && (!clientReady || !reduceMotion);
+  /** SSR / first paint: framer usually reports no reduced motion; avoid branching before clientReady. */
+  const splashReducedMotionUi = clientReady && !!reduceMotion;
   const [chickenMoment, setChickenMoment] = useState(false);
   const [chickenSpot, setChickenSpot] = useState<{
     bottom: number;
@@ -136,13 +137,26 @@ export function HomeExperience() {
   }, []);
 
   useEffect(() => {
-    if (!reduceMotion) return;
+    if (reduceMotion) {
+      try {
+        sessionStorage.setItem(STORAGE_KEY, "1");
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     try {
-      sessionStorage.setItem(STORAGE_KEY, "1");
+      if (sessionStorage.getItem(STORAGE_KEY) === "1") {
+        setSplashActive(false);
+      }
     } catch {
       /* ignore */
     }
   }, [reduceMotion]);
+
+  useEffect(() => {
+    setClientReady(true);
+  }, []);
 
   useEffect(() => {
     if (splashOpen) {
@@ -212,18 +226,13 @@ export function HomeExperience() {
           Ga naar de inhoud
         </a>
 
-        <AnimatePresence>
-          {splashOpen && (
-            <motion.div
-              key="splash-chrome"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-0 z-[100] bg-linear-to-b from-pp-olive via-[#1a322e] to-[#152a26]"
-              aria-hidden
-            />
-          )}
-        </AnimatePresence>
+        {/* No AnimatePresence here: it can SSR a child that is missing on the first client pass → hydration mismatch vs the inert/main column. */}
+        {splashOpen ? (
+          <div
+            className="fixed inset-0 z-[100] bg-linear-to-b from-pp-olive via-[#1a322e] to-[#152a26]"
+            aria-hidden
+          />
+        ) : null}
 
         {splashOpen ? (
           <div
@@ -258,7 +267,7 @@ export function HomeExperience() {
               </motion.h1>
 
               <div className="mt-8 flex w-full justify-center px-2 sm:mt-10">
-                {!reduceMotion ? (
+                {!splashReducedMotionUi ? (
                   <SplashSlideshow onComplete={onSlideshowFinished} />
                 ) : (
                   <p className="font-display text-center text-sm tracking-[0.06em] text-pp-creme/80">

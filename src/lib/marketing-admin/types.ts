@@ -93,7 +93,57 @@ export type AuditLogEntry = {
   details: string;
 };
 
+export type AdminRole = "super_admin" | "marketing_editor" | "publisher" | "viewer";
+
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  avatarLabel: string;
+};
+
+export type MediaAssetType = "image" | "video" | "document" | "svg";
+
+export type MediaFolder = {
+  id: string;
+  name: string;
+  parentId: string | null;
+  path: string;
+  color: string;
+  updatedAt: string;
+};
+
+export type MediaAssetUsage = {
+  entity: string;
+  entityId: string;
+  label: string;
+  route?: string;
+};
+
+export type MediaAsset = {
+  id: string;
+  name: string;
+  folderId: string;
+  src: string;
+  previewSrc: string;
+  type: MediaAssetType;
+  extension: string;
+  mimeType: string;
+  sizeBytes: number;
+  width?: number;
+  height?: number;
+  altText: string;
+  tags: string[];
+  uploadedAt: string;
+  updatedAt: string;
+  uploadedBy: string;
+  usages: MediaAssetUsage[];
+};
+
 export type MarketingAdminState = {
+  currentUserId: string;
+  users: AdminUser[];
   locations: ManagedLocation[];
   locationsPageCopy: {
     kicker: string;
@@ -132,6 +182,8 @@ export type MarketingAdminState = {
     marqueePhrases: string[];
   };
   promotions: Promotion[];
+  mediaFolders: MediaFolder[];
+  mediaAssets: MediaAsset[];
   globalSettings: GlobalSettings;
   auditLog: AuditLogEntry[];
 };

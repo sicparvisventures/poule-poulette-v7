@@ -4,6 +4,75 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
+const DOODLE_MASK_STYLE = {
+  WebkitMaskImage: 'url("/images/doodle_clean_upscaled.png")',
+  maskImage: 'url("/images/doodle_clean_upscaled.png")',
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+  WebkitMaskPosition: "center",
+  maskPosition: "center",
+  WebkitMaskSize: "contain",
+  maskSize: "contain",
+} as const;
+
+function HeroDoodleFootLink({
+  href,
+  ariaLabel,
+  wrapperClassName,
+  restRotation,
+  reduceMotion,
+  baseDropShadowClass,
+}: {
+  href: string;
+  ariaLabel: string;
+  wrapperClassName: string;
+  restRotation: number;
+  reduceMotion: boolean | null;
+  /** Zelfde patroon als kip-lockup: crème laag → lollypop bij hover (mask, geen blob). */
+  baseDropShadowClass: string;
+}) {
+  const hoverRot = restRotation + (restRotation >= 0 ? 9 : -9);
+  return (
+    <motion.div
+      className={wrapperClassName}
+      initial={false}
+      animate={{ rotate: restRotation }}
+      whileHover={
+        reduceMotion
+          ? undefined
+          : { rotate: hoverRot, scale: 1.12, y: -4 }
+      }
+      whileTap={reduceMotion ? undefined : { scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 400, damping: 19 }}
+    >
+      <Link
+        href={href}
+        className="group block opacity-[0.88] transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pp-lollypop focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        aria-label={ariaLabel}
+      >
+        <div className="relative aspect-square w-full">
+          <div
+            aria-hidden
+            className={`absolute inset-0 opacity-[0.92] transition-all duration-300 ease-out group-hover:scale-[1.02] group-hover:opacity-0 group-focus-visible:scale-[1.02] group-focus-visible:opacity-0 ${baseDropShadowClass}`}
+            style={{
+              backgroundColor: "#fdf8c1",
+              ...DOODLE_MASK_STYLE,
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-0 drop-shadow-[0_0_24px_rgb(244_149_189/0.7)] transition-all duration-300 ease-out group-hover:scale-[1.05] group-hover:opacity-100 group-focus-visible:scale-[1.05] group-focus-visible:opacity-100"
+            style={{
+              backgroundColor: "#f495bd",
+              ...DOODLE_MASK_STYLE,
+            }}
+          />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
 export type HomeHeroPrimaryProps = {
   splashActive: boolean;
   splashTitleId: string;
@@ -82,32 +151,22 @@ export function HomeHeroPrimary({
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-pp-black/75 to-transparent" />
 
-        <div
-          className="pointer-events-none absolute left-5 top-[max(1.25rem,4vh)] z-8 hidden w-[min(20vw,3.35rem)] opacity-[0.72] sm:left-7 sm:top-[max(1.75rem,5.5vh)] sm:w-[min(17vw,3.5rem)] md:left-9 md:top-12 md:block md:w-15 rotate-14"
-          aria-hidden
-        >
-          <Image
-            src="/images/doodle_clean_upscaled.png"
-            alt=""
-            width={256}
-            height={256}
-            className="h-auto w-full object-contain drop-shadow-[0_4px_14px_rgb(0_0_0/0.42)]"
-            sizes="(max-width: 768px) 20vw, 64px"
-          />
-        </div>
-        <div
-          className="pointer-events-none absolute left-3 top-[max(4.5rem,12vh)] z-8 hidden w-[min(26vw,4.25rem)] opacity-[0.92] sm:left-5 sm:top-[max(5rem,14vh)] sm:w-[min(22vw,4.75rem)] md:left-6 md:top-28 md:block md:w-20 -rotate-8"
-          aria-hidden
-        >
-          <Image
-            src="/images/doodle_clean_upscaled.png"
-            alt=""
-            width={256}
-            height={256}
-            className="h-auto w-full object-contain drop-shadow-[0_6px_20px_rgb(0_0_0/0.5)]"
-            sizes="(max-width: 768px) 26vw, 80px"
-          />
-        </div>
+        <HeroDoodleFootLink
+          href="/backstage"
+          ariaLabel="Ga naar Backstage"
+          wrapperClassName="absolute left-5 top-[max(1.25rem,4vh)] z-[26] hidden w-[min(20vw,3.35rem)] sm:left-7 sm:top-[max(1.75rem,5.5vh)] sm:w-[min(17vw,3.5rem)] md:left-9 md:top-12 md:block md:w-15"
+          restRotation={14}
+          reduceMotion={reduceMotion}
+          baseDropShadowClass="drop-shadow-[0_4px_14px_rgb(0_0_0/0.42)]"
+        />
+        <HeroDoodleFootLink
+          href="/hello"
+          ariaLabel="Easter egg — loyalty app preview"
+          wrapperClassName="absolute left-3 top-[max(4.5rem,12vh)] z-[26] hidden w-[min(26vw,4.25rem)] sm:left-5 sm:top-[max(5rem,14vh)] sm:w-[min(22vw,4.75rem)] md:left-6 md:top-28 md:block md:w-20"
+          restRotation={-8}
+          reduceMotion={reduceMotion}
+          baseDropShadowClass="drop-shadow-[0_6px_20px_rgb(0_0_0/0.5)]"
+        />
 
         <div className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-3 px-6 sm:gap-4 md:z-5 md:gap-5">
           <button
