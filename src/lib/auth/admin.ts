@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 
-export const ADMIN_SESSION_COOKIE = "pp_admin_session";
+import { ADMIN_SESSION_COOKIE } from "./admin-constants";
+
+export { ADMIN_SESSION_COOKIE };
 
 function digest(value: string) {
   return crypto.createHash("sha256").update(value).digest("hex");

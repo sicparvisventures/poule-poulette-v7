@@ -4,9 +4,9 @@ import {
   ADMIN_SESSION_COOKIE,
   isAdminConfigured,
   isValidAdminSession,
-} from "@/lib/auth/admin";
+} from "@/lib/auth/admin-edge";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (!pathname.startsWith("/admin")) {
@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   }
 
   const sessionValue = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-  if (isValidAdminSession(sessionValue)) {
+  if (await isValidAdminSession(sessionValue)) {
     return NextResponse.next();
   }
 
