@@ -293,13 +293,17 @@ function PresentationDeckMobile({
           const prev = i > 0 ? deckSlides[i - 1] : undefined;
           const seamlessFullBleed =
             Boolean(slide.fullBleedImage && prev?.fullBleedImage);
+          const needsCremeBreak = i === 3;
           const liBorder =
             i > 0 && !seamlessFullBleed
               ? "border-t border-pp-olive/10"
               : "";
           const mobileSlideSrc = `/fotookes/${Math.min(i + 1, 7)}mobile.svg`;
           return (
-          <li key={slide.id} className={liBorder}>
+          <li
+            key={slide.id}
+            className={`${liBorder} ${needsCremeBreak ? "mt-3 border-t-0 bg-pp-creme/45 pt-3 sm:mt-4 sm:pt-4" : ""}`}
+          >
             {slide.fullBleedImage ? (
               <article
                 aria-label={`Slide ${i + 1} van ${slideCount}`}

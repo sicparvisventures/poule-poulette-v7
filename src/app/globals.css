@@ -43,6 +43,24 @@ body {
   font-family: var(--font-sans);
 }
 
+.pp-admin-shell {
+  --pp-admin-copy-font: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--pp-admin-copy-font);
+}
+
+.pp-admin-shell .font-display {
+  font-family: var(--font-bacon-kingdom), ui-serif, Georgia, serif;
+}
+
+.pp-admin-shell .font-accent.uppercase {
+  font-family: var(--font-lino-stamp), ui-sans-serif, system-ui, sans-serif;
+}
+
+.pp-admin-shell .font-accent:not(.uppercase) {
+  font-family: var(--pp-admin-copy-font);
+  letter-spacing: normal;
+}
+
 /* Hero → deck blend band: horizontale marquee (geen Tailwind flex op dit element) */
 .pp-hero-deck-marquee-inner {
   display: flex;

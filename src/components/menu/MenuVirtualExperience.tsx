@@ -20,11 +20,14 @@ import {
 } from "react";
 import type { RefObject } from "react";
 import { FixedPageIntroStrip } from "@/components/FixedPageIntroStrip";
+import { PromotionStrip } from "@/components/marketing/PromotionStrip";
 import {
   menuMarqueePhrases,
   menuPageCopy,
   menuVirtualSections,
 } from "@/content/menuSlides";
+import type { ManagedMenuSection } from "@/lib/marketing-admin/types";
+import { useMarketingSnapshot } from "@/lib/marketing-admin/store";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const DESKTOP_MENU_SPREADS = [
@@ -34,8 +37,13 @@ const DESKTOP_MENU_SPREADS = [
   { left: "brand-endnote" as const, right: "brand-back" as const, active: [5] as number[] },
 ] as const;
 
+type MenuSectionLike = ManagedMenuSection | (typeof menuVirtualSections)[number];
+
 function MenuMarqueeBand() {
-  const segment = `${menuMarqueePhrases.join(" · ")} · `;
+  const phrases = useMarketingSnapshot(
+    (state) => state.menuPageCopy.marqueePhrases,
+  );
+  const segment = `${(phrases.length ? phrases : menuMarqueePhrases).join(" · ")} · `;
   return (
     <div
       className="relative z-10 isolate overflow-hidden border-b border-pp-white/12"
@@ -99,16 +107,8 @@ function DesktopMenuSpread({
   onOpenLeft,
   onOpenRight,
 }: {
-  leftPage:
-    | (typeof menuVirtualSections)[number]
-    | "brand-cover"
-    | "brand-endnote"
-    | "brand-back";
-  rightPage:
-    | (typeof menuVirtualSections)[number]
-    | "brand-cover"
-    | "brand-endnote"
-    | "brand-back";
+  leftPage: MenuSectionLike | "brand-cover" | "brand-endnote" | "brand-back";
+  rightPage: MenuSectionLike | "brand-cover" | "brand-endnote" | "brand-back";
   onOpenLeft: () => void;
   onOpenRight: () => void;
 }) {
@@ -265,7 +265,13 @@ export function MenuVirtualExperience() {
   const [zoomIndex, setZoomIndex] = useState<number | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showMenuNote, setShowMenuNote] = useState(true);
-  const count = menuVirtualSections.length;
+  const managedSections = useMarketingSnapshot((state) => state.menuSections);
+  const managedPageCopy = useMarketingSnapshot((state) => state.menuPageCopy);
+  const sections = managedSections.length ? managedSections : menuVirtualSections;
+  const pageCopy = managedPageCopy.title
+    ? managedPageCopy
+    : { ...menuPageCopy, marqueePhrases: [...menuMarqueePhrases] };
+  const count = sections.length;
   const displayCount = isDesktop ? DESKTOP_MENU_SPREADS.length : count;
   const slideStepVw = 100;
   const activeSpread = isDesktop
@@ -278,17 +284,17 @@ export function MenuVirtualExperience() {
         if (!activeSpread) return "";
         const leftLabel =
           typeof activeSpread.left === "number"
-            ? menuVirtualSections[activeSpread.left]?.label
+            ? sections[activeSpread.left]?.label
             : activeSpread.left === "brand-cover"
               ? "Cover"
               : "Reserveer";
         const rightLabel =
           typeof activeSpread.right === "number"
-            ? menuVirtualSections[activeSpread.right]?.label
+            ? sections[activeSpread.right]?.label
             : "Back cover";
         return `${leftLabel} / ${rightLabel}`;
       })()
-    : menuVirtualSections[currentNavIndex]?.label ?? "";
+    : sections[currentNavIndex]?.label ?? "";
 
   const { scrollYProgress } = useScroll({
     target: scrollRootRef,
@@ -434,8 +440,7 @@ export function MenuVirtualExperience() {
     };
   }, [zoomIndex]);
 
-  const zoomSlide =
-    zoomIndex !== null ? menuVirtualSections[zoomIndex] : null;
+  const zoomSlide = zoomIndex !== null ? sections[zoomIndex] : null;
 
   if (reduceMotion) {
     return (
@@ -445,17 +450,18 @@ export function MenuVirtualExperience() {
         {showMenuNote ? (
           <FixedPageIntroStrip
             labelId={labelId}
-            title={menuPageCopy.title}
-            introBar={menuPageCopy.introBar}
+            title={pageCopy.title}
+            introBar={pageCopy.introBar}
             reduceMotion={reduceMotion}
             onDismiss={() => setShowMenuNote(false)}
             dismissAriaLabel="Verberg menu-uitleg"
           />
         ) : null}
+        <PromotionStrip placement="menu-page" />
         <div
           className={`flex flex-col ${showMenuNote ? "pt-[3.25rem] sm:pt-12" : ""}`}
         >
-          {menuVirtualSections.map((section, i) => (
+          {sections.map((section, i) => (
             <article
               key={section.src}
               className="border-b border-pp-olive/10 bg-pp-white"
@@ -518,14 +524,15 @@ export function MenuVirtualExperience() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-pp-white text-pp-black">
-      <MenuPageChrome />
-      <MenuMarqueeBand />
+        <MenuPageChrome />
+        <MenuMarqueeBand />
+        <PromotionStrip placement="menu-page" />
 
       {showMenuNote ? (
         <FixedPageIntroStrip
           labelId={labelId}
-          title={menuPageCopy.title}
-          introBar={menuPageCopy.introBar}
+          title={pageCopy.title}
+          introBar={pageCopy.introBar}
           reduceMotion={reduceMotion}
           onDismiss={() => setShowMenuNote(false)}
           dismissAriaLabel="Verberg menu-uitleg"
@@ -599,36 +606,36 @@ export function MenuVirtualExperience() {
                     <p className="font-accent text-[0.65rem] tracking-[0.3em] text-pp-olive/50 uppercase">
                       {isDesktop
                         ? typeof activeSpread?.left === "number"
-                          ? menuVirtualSections[activeSpread.left]?.kicker
+                          ? sections[activeSpread.left]?.kicker
                           : "Poule & Poulette"
-                        : menuVirtualSections[index]?.kicker}
+                        : sections[index]?.kicker}
                     </p>
                     <p className="font-display mt-1 truncate text-xl text-pp-olive md:text-2xl">
                       {isDesktop
                         ? typeof activeSpread?.left === "number"
-                          ? `${menuVirtualSections[activeSpread.left]?.label} / ${
+                          ? `${sections[activeSpread.left]?.label} / ${
                               typeof activeSpread.right === "number"
-                                ? menuVirtualSections[activeSpread.right]?.label
+                                ? sections[activeSpread.right]?.label
                                 : "Back cover"
                             }`
                           : activeSpread?.left === "brand-cover"
                             ? `Cover / ${
                                 typeof activeSpread?.right === "number"
-                                  ? menuVirtualSections[activeSpread.right]?.label
+                                  ? sections[activeSpread.right]?.label
                                   : "Back cover"
                               }`
                             : "Reserveer / Back cover"
-                        : menuVirtualSections[index]?.label}
+                        : sections[index]?.label}
                     </p>
                   </div>
                   <p className="font-accent hidden max-w-xs text-right text-xs leading-relaxed text-pp-black/55 sm:block">
                     {isDesktop
                       ? typeof activeSpread?.left === "number"
-                        ? menuVirtualSections[activeSpread.left]?.blurb
+                        ? sections[activeSpread.left]?.blurb
                         : activeSpread?.left === "brand-cover"
                           ? "Start met de kaft en blader daarna verder door het menu alsof het open voor je ligt."
                           : "Kies je locatie, reserveer je tafel en sluit af in echte Poule & Poulette-sfeer."
-                      : menuVirtualSections[index]?.blurb}
+                      : sections[index]?.blurb}
                   </p>
                 </div>
               </div>
@@ -651,12 +658,12 @@ export function MenuVirtualExperience() {
                               ? "brand-cover"
                               : section.left === "brand-endnote"
                                 ? "brand-endnote"
-                                : menuVirtualSections[section.left]
+                                : sections[section.left]
                           }
                           rightPage={
                             section.right === "brand-back"
                               ? "brand-back"
-                              : menuVirtualSections[section.right]
+                              : sections[section.right]
                           }
                           onOpenLeft={() => {
                             if (typeof section.left === "number") {
@@ -671,7 +678,7 @@ export function MenuVirtualExperience() {
                         />
                         <p className="font-accent mt-2 max-w-md px-2 text-center text-xs leading-relaxed text-pp-black/60 sm:hidden">
                           {typeof section.left === "number"
-                            ? menuVirtualSections[section.left].blurb
+                            ? sections[section.left].blurb
                             : section.left === "brand-cover"
                               ? "Start met de kaft en blader daarna verder door het menu."
                               : "Kies je locatie, reserveer je tafel en sluit af in stijl."}
@@ -679,7 +686,7 @@ export function MenuVirtualExperience() {
                       </div>
                     </div>
                   ))
-                : menuVirtualSections.map((section, i) => (
+                : sections.map((section, i) => (
                     <div
                       key={section.src}
                       className="relative flex h-full min-h-0 w-screen shrink-0 flex-col items-stretch justify-start px-2 pb-1 pt-0 sm:px-3 md:px-5 md:pb-2"
@@ -711,7 +718,7 @@ export function MenuVirtualExperience() {
             <div className="shrink-0 border-t border-pp-olive/10 bg-pp-white/85 px-4 py-2 backdrop-blur-sm sm:px-8 md:py-2.5">
               <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
                 <p className="font-accent text-center text-[0.62rem] tracking-[0.2em] text-pp-olive/45 uppercase">
-                  {menuPageCopy.scrollHint}
+                  {pageCopy.scrollHint}
                 </p>
                 <div
                   className="flex w-full max-w-xl items-center justify-between gap-3"
@@ -790,10 +797,11 @@ function MenuPageChrome() {
 }
 
 function MenuFooter() {
+  const pageCopy = useMarketingSnapshot((state) => state.menuPageCopy);
   return (
     <footer className="shrink-0 border-t border-pp-olive/10 bg-pp-white px-5 py-8 sm:px-8">
       <p className="font-accent mx-auto max-w-lg text-center text-[0.7rem] leading-relaxed tracking-[0.04em] text-pp-black/45">
-        {menuPageCopy.footnote}
+        {pageCopy.footnote || menuPageCopy.footnote}
       </p>
     </footer>
   );
@@ -809,7 +817,7 @@ function ZoomModal({
   onNext,
   onClose,
 }: {
-  zoomSlide: (typeof menuVirtualSections)[number] | null;
+  zoomSlide: MenuSectionLike | null;
   zoomIndex: number | null;
   count: number;
   zoomTitleId: string;
@@ -818,6 +826,7 @@ function ZoomModal({
   onNext: () => void;
   onClose: () => void;
 }) {
+  const pageCopy = useMarketingSnapshot((state) => state.menuPageCopy);
   return (
     <AnimatePresence>
       {zoomSlide && zoomIndex !== null ? (
@@ -861,7 +870,7 @@ function ZoomModal({
               onClick={onClose}
               className="font-accent rounded-full border border-pp-creme/14 bg-pp-creme/8 px-4 py-2.5 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:border-pp-lollypop/45 hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
             >
-              {menuPageCopy.zoomClose} (Esc)
+              {pageCopy.zoomClose || menuPageCopy.zoomClose} (Esc)
             </button>
           </div>
           <div

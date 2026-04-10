@@ -5,16 +5,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { RefObject } from "react";
+import { PromotionStrip } from "@/components/marketing/PromotionStrip";
 import {
   groupMenuTiers,
   groupsMarqueePhrases,
   groupsPageCopy,
 } from "@/content/groupsPage";
+import type { ManagedGroupTier } from "@/lib/marketing-admin/types";
+import { useMarketingSnapshot } from "@/lib/marketing-admin/store";
 
 const ease = [0.22, 1, 0.36, 1] as const;
+type GroupTierLike = ManagedGroupTier | (typeof groupMenuTiers)[number];
 
 function GroupsMarqueeBand() {
-  const segment = `${groupsMarqueePhrases.join(" · ")} · `;
+  const phrases = useMarketingSnapshot(
+    (state) => state.groupsPageCopy.marqueePhrases,
+  );
+  const segment = `${(phrases.length ? phrases : groupsMarqueePhrases).join(" · ")} · `;
   return (
     <div
       className="relative z-10 isolate overflow-hidden border-b border-pp-white/12"
@@ -45,10 +52,16 @@ function GroupsMarqueeBand() {
 
 export function GroepenExperience() {
   const reduceMotion = useReducedMotion();
+  const managedGroups = useMarketingSnapshot((state) => state.groups);
+  const managedPageCopy = useMarketingSnapshot((state) => state.groupsPageCopy);
+  const groups = managedGroups.length ? managedGroups : groupMenuTiers;
+  const pageCopy = managedPageCopy.title
+    ? managedPageCopy
+    : { ...groupsPageCopy, marqueePhrases: [...groupsMarqueePhrases] };
   const zoomTitleId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const [zoomIndex, setZoomIndex] = useState<number | null>(null);
-  const count = groupMenuTiers.length;
+  const count = groups.length;
 
   const openPrev = useCallback(() => {
     setZoomIndex((i) =>
@@ -94,7 +107,7 @@ export function GroepenExperience() {
     };
   }, [zoomIndex]);
 
-  const zoomTier = zoomIndex !== null ? groupMenuTiers[zoomIndex] : null;
+  const zoomTier = zoomIndex !== null ? groups[zoomIndex] : null;
 
   return (
     <div className="flex min-h-dvh flex-col bg-pp-white text-pp-black">
@@ -119,6 +132,7 @@ export function GroepenExperience() {
       </header>
 
       <GroupsMarqueeBand />
+      <PromotionStrip placement="groups-page" />
 
       <main className="relative flex flex-1 flex-col overflow-hidden">
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
@@ -165,18 +179,18 @@ export function GroepenExperience() {
             className="mx-auto max-w-2xl text-center"
           >
             <p className="font-accent text-[0.62rem] tracking-[0.32em] text-pp-olive/50 uppercase">
-              {groupsPageCopy.kicker}
+              {pageCopy.kicker}
             </p>
             <h1 className="font-display mt-2 text-3xl text-pp-olive sm:text-4xl">
-              {groupsPageCopy.title}
+              {pageCopy.title}
             </h1>
             <p className="font-accent mt-4 text-sm leading-relaxed text-pp-black/72 sm:text-base">
-              {groupsPageCopy.intro}
+              {pageCopy.intro}
             </p>
           </motion.div>
 
           <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:mt-12 md:grid-cols-3 md:gap-8">
-            {groupMenuTiers.map((tier, i) => (
+            {groups.map((tier, i) => (
               <motion.button
                 key={tier.id}
                 type="button"
@@ -258,7 +272,7 @@ export function GroepenExperience() {
 
       <footer className="relative z-10 shrink-0 border-t border-pp-olive/10 bg-pp-white/95 px-5 py-8 backdrop-blur-sm sm:px-8">
         <p className="font-accent mx-auto max-w-lg text-center text-[0.7rem] leading-relaxed tracking-[0.04em] text-pp-black/45">
-          {groupsPageCopy.footnote}
+          {pageCopy.footnote}
         </p>
       </footer>
 
@@ -286,7 +300,7 @@ function GroupMenuZoomModal({
   onNext,
   onClose,
 }: {
-  tier: (typeof groupMenuTiers)[number] | null;
+  tier: GroupTierLike | null;
   zoomIndex: number | null;
   count: number;
   zoomTitleId: string;
@@ -295,6 +309,7 @@ function GroupMenuZoomModal({
   onNext: () => void;
   onClose: () => void;
 }) {
+  const pageCopy = useMarketingSnapshot((state) => state.groupsPageCopy);
   return (
     <AnimatePresence>
       {tier && zoomIndex !== null ? (
@@ -335,7 +350,7 @@ function GroupMenuZoomModal({
               onClick={onClose}
               className="font-accent rounded-sm px-4 py-2 text-xs tracking-[0.2em] text-pp-creme uppercase ring-pp-creme transition-colors hover:text-pp-lollypop focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pp-lollypop"
             >
-              {groupsPageCopy.zoomClose} (Esc)
+              {pageCopy.zoomClose || groupsPageCopy.zoomClose} (Esc)
             </button>
           </div>
           <div

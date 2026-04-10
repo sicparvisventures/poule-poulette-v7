@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { PromotionStrip } from "@/components/marketing/PromotionStrip";
 import {
   brandCitiesLine,
   chainLocations,
@@ -11,11 +12,15 @@ import {
   locationsMarqueePhrases,
   locationsPageCopy,
 } from "@/content/locations";
+import { useMarketingSnapshot } from "@/lib/marketing-admin/store";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 function LocationsMarqueeBand() {
-  const segment = `${locationsMarqueePhrases.join(" · ")} · `;
+  const phrases = useMarketingSnapshot(
+    (state) => state.locationsPageCopy.marqueePhrases,
+  );
+  const segment = `${(phrases.length ? phrases : locationsMarqueePhrases).join(" · ")} · `;
   return (
     <div
       className="relative z-10 isolate overflow-hidden border-b border-pp-white/12"
@@ -70,24 +75,31 @@ function LocationsPageChrome() {
 
 export function LocationsVirtualExperience() {
   const reduceMotion = useReducedMotion();
+  const managedLocations = useMarketingSnapshot((state) => state.locations);
+  const managedPageCopy = useMarketingSnapshot((state) => state.locationsPageCopy);
+  const locations = managedLocations.length ? managedLocations : chainLocations;
+  const pageCopy = managedPageCopy.title
+    ? managedPageCopy
+    : { ...locationsPageCopy, marqueePhrases: [...locationsMarqueePhrases] };
   const [index, setIndex] = useState(0);
-  const active = chainLocations[Math.min(index, chainLocations.length - 1)];
+  const active = locations[Math.min(index, locations.length - 1)];
   const mapsHref = googleMapsSearchUrl(active.mapsQuery);
 
   const locationRows = useMemo(
     () =>
-      chainLocations.map((loc, i) => ({
+      locations.map((loc, i) => ({
         ...loc,
         mapsHref: googleMapsSearchUrl(loc.mapsQuery),
         odd: i % 2 !== 0,
       })),
-    [],
+    [locations],
   );
 
   return (
     <div className="flex min-h-dvh flex-col bg-pp-white text-pp-black">
       <LocationsPageChrome />
       <LocationsMarqueeBand />
+      <PromotionStrip placement="locations-page" />
 
       <main className="relative flex flex-1 flex-col">
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
@@ -109,13 +121,13 @@ export function LocationsVirtualExperience() {
               className="border border-pp-olive/14 bg-pp-white/72 p-5"
             >
               <p className="font-accent text-[0.62rem] tracking-[0.3em] text-pp-olive/58 uppercase">
-                {locationsPageCopy.kicker}
+                {pageCopy.kicker}
               </p>
               <h1 className="font-display mt-2 text-3xl text-pp-olive sm:text-4xl">
-                Locaties
+                {pageCopy.title}
               </h1>
               <p className="font-accent mt-4 text-sm leading-relaxed text-pp-black/74 sm:text-base">
-                {locationsPageCopy.intro}
+                {pageCopy.intro}
               </p>
               <p className="font-accent mt-4 text-[0.62rem] tracking-[0.18em] text-pp-black/55 uppercase">
                 {brandCitiesLine}
@@ -177,7 +189,7 @@ export function LocationsVirtualExperience() {
 
         <section className="relative border-b border-pp-olive/12 bg-pp-white px-5 py-5 sm:px-8">
           <div className="mx-auto flex w-full max-w-6xl flex-wrap gap-2">
-            {chainLocations.map((loc, i) => (
+            {locations.map((loc, i) => (
               <button
                 key={loc.id}
                 type="button"
@@ -296,7 +308,7 @@ export function LocationsVirtualExperience() {
 
       <footer className="border-t border-pp-olive/10 bg-pp-white px-5 py-8 sm:px-8">
         <p className="font-accent mx-auto max-w-lg text-center text-[0.7rem] leading-relaxed tracking-[0.04em] text-pp-black/45">
-          {locationsPageCopy.footnote}
+          {pageCopy.footnote}
         </p>
         <p className="font-accent mt-4 text-center text-sm text-pp-olive/70">
           © Poule &amp; Poulette — België

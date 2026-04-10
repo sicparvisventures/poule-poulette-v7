@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LocationDetailView } from "@/components/locations/LocationDetailView";
+import { ManagedLocationDetail } from "@/components/locations/ManagedLocationDetail";
 import {
   brandTagline,
   getLocationBySlug,
@@ -33,5 +33,5 @@ export default async function LocationDetailPage({ params }: Props) {
   if (!loc) {
     notFound();
   }
-  return <LocationDetailView location={loc} />;
+  return <ManagedLocationDetail slug={slug} />;
 }
